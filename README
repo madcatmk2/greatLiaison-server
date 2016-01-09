@@ -1,1 +1,9 @@
 e-commerce solution for Great Liaison
+
+Setup instructions:
+
+1) Download and install node.js
+  - Developed on version 4.2.4
+2) Download and install MongoDB
+  - DB version 2.6.10
+3) 

@@ -1,7 +1,7 @@
 {
   "databaseConfig": {
     "username": "greatliaison",
-    "password": "11433266",
+    "password": "abc123",
     "host": "localhost",
     "port": "27017",
     "database": "greatliaison"
