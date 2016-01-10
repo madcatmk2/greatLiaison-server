@@ -1,12 +1,32 @@
 'use strict';
 
+var paypal = require('paypal-rest-sdk');
+var paypalConfig = require('../../config/paypal');
+
 var auth = require('../auth/index');
 
 var productModel = require('../../models/productModel');
 var cartModel = require('../../models/cartModel');
 
+// For testing Paypal SDK
+var savedCard = {
+  "type": "visa",
+  "number": "4417119669820331",
+  "expire_month": "11",
+  "expire_year": "2019",
+  "cvv2": "123",
+  "first_name": "Joe",
+  "last_name": "Shopper"
+};
+
 module.exports = function (router) {
   require('../auth/passport')(router);
+
+  paypal.configure(paypalConfig);
+
+  router.post('/payByCreditCard', function (req, res) {
+    checkoutByCreditCard(req, res);
+  });
 
   /**
     * Returns the current shopping cart
@@ -258,4 +278,17 @@ function isLoggedIn(req, res, next) {
 
   // if they aren't redirect them to the home page
   res.redirect('../auth/unauth');
+}
+
+function checkoutByCreditCard(req, res) {
+  paypal.creditCard.create(savedCard, function (err, credit_card) {
+    if (err) {
+      console.log(err);
+      res.json({ message: err });
+    } else {
+      console.log("Save Credit Card Response");
+      console.log(JSON.stringify(credit_card));
+      res.json({ message: credit_card });
+    }
+  });
 }

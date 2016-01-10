@@ -24,7 +24,8 @@
     "passport" : "^0.3.2",
     "passport-local" : "^1.0.0",
     "connect-flash" : "^0.1.1",
-    "bcrypt-nodejs" : "latest"
+    "bcrypt-nodejs" : "latest",
+    "paypal-rest-sdk" : "^1.6.8"
   },
   "devDependencies": {
     "grunt": "^0.4.5",
