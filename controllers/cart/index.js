@@ -1,41 +1,98 @@
 'use strict';
 
+var auth = require('../auth/index');
+
 var productModel = require('../../models/productModel');
+var cartModel = require('../../models/cartModel');
 
 module.exports = function (router) {
+  require('../auth/passport')(router);
 
   /**
     * Returns the current shopping cart
     */
-  router.get('/', function (req, res) {
+  router.get('/', isLoggedIn, loadCartFromDB, function (req, res) {
 
-    //Retrieve the shopping cart from memory
+    // Retrieve the shopping cart from memory
     var cart = req.session.cart,
         displayCart = {items: [], total: 0},
         total = 0;
 
+    console.log('session cart: ' + cart);
+
     if (!cart) {
-      res.json({ message: 'Your cart is empty! (1)' });
-      return;
-    }
+      console.log('Session cart not found, searching DB');
+//       console.log('username: ' + req.user.local.email);
 
-    //Ready the products for display
-    for (var item in cart) {
-      if (cart[item] != null)
-      {
-        displayCart.items.push(cart[item]);
-        total += (cart[item].qty * cart[item].price);
+      // Try to retrieve cart from database from previous session
+      cartModel.find({ 'username': req.user.local.email }, '-_id -username -__v', function (err, retrievedCart) {
+
+        var displayCart = {items: [], total: 0},
+            total = 0;
+
+        if (err) {
+          console.log(err);
+        }
+
+        if (!retrievedCart) {
+          res.json({ message: 'Your cart is empty! (1)' });
+          return;
+        }
+
+        var newCart = {};
+
+        // Query each item data and add to cart
+        for (var i = 0; i < retrievedCart.length; i++) {
+          var model =
+              {
+                name: retrievedCart[i].name,
+                volume: retrievedCart[i].volume,
+                prettyVolume: retrievedCart[i].prettyVolume,
+                price: retrievedCart[i].price,
+                prettyPrice: retrievedCart[i].prettyPrice,
+                qty: retrievedCart[i].qty
+              };
+
+          displayCart.items.push(model);
+          total += (retrievedCart[i].qty * retrievedCart[i].price);
+
+          newCart[retrievedCart[i].item_id] = model;
+        }
+
+        if (total == 0) {
+          res.json({ message: 'Your cart is empty! (2a)' });
+          return;
+        }
+
+        req.session.total = displayCart.total = total.toFixed(2);
+        req.session.cart = newCart;
+
+        res.json({ message: displayCart });
+        return;
+      });
+    } else {
+      console.log('Session cart found');
+
+      // Display products in session's cart
+      for (var item in cart) {
+        if (cart[item] != null)
+        {
+          displayCart.items.push(cart[item]);
+          total += (cart[item].qty * cart[item].price);
+        }
       }
-    }
 
-    if (total == 0)
-    {
-      res.json({ message: 'Your cart is empty! (2)' });
-      return;
-    }
-    req.session.total = displayCart.total = total.toFixed(2);
+      if (total == 0)
+      {
+        res.json({ message: 'Your cart is empty! (2b)' });
+        return;
+      }
 
-    res.json({ message: displayCart });
+      req.session.total = displayCart.total = total.toFixed(2);
+
+//       res.json({ message: JSON.stringify(displayCart, null, 1) });
+      res.json({ message: displayCart });
+    }
   });
 
   /**
@@ -55,7 +112,7 @@ module.exports = function (router) {
         console.log('Error adding product to cart: ', err);
         res.json({ message: 'Error adding product to cart: ' + err });
         return;
-      } else if (id == null) {
+      } else if (id == null || prod == null) {
         res.json({ message: 'Product not found' });
         return;
       }
@@ -74,6 +131,31 @@ module.exports = function (router) {
           qty: 1
         };
       }
+
+//       var newCart = new cartModel({ username: req.user.local.email, items: cart });
+
+      var query = {
+        username: req.user.local.email,
+        item_id: id
+      };
+      var update = {
+        username: req.user.local.email,
+        name: prod.name,
+        volume: prod.volume,
+        prettyVolume: prod.prettyVolume(),
+        price: prod.price,
+        prettyPrice: prod.prettyPrice(),
+        qty: cart[id].qty
+      };
+      var options = { upsert: true };
+
+      cartModel.findOneAndUpdate(query, update, options, function(err, updateCart) {
+        if(err) {
+          console.log('Update cart error', err);
+        }
+
+        console.log(updateCart);
+      });
 
       res.json({ message: 'Item added' });
 
@@ -104,3 +186,76 @@ module.exports = function (router) {
     }
   });
 };
+
+function loadCartFromDB(req, res, next) {
+
+  // Try to retrieve cart from database from previous session
+  cartModel.find({ 'username': req.user.local.email }, '-_id -username -__v', function (err, retrievedCart) {
+
+    var displayCart = {items: [], total: 0},
+        total = 0;
+
+    if (err) {
+      console.log(err);
+    }
+
+    if (!retrievedCart) {
+      console.log('No cart found in passport.js');
+      return;
+    }
+
+    console.log('retrievedCart: ' + retrievedCart);
+
+    var newCart = {};
+
+    // Query each item data and add to cart
+    for (var i = 0; i < retrievedCart.length; i++) {
+      var model =
+          {
+            name: retrievedCart[i].name,
+            volume: retrievedCart[i].volume,
+            prettyVolume: retrievedCart[i].prettyVolume,
+            price: retrievedCart[i].price,
+            prettyPrice: retrievedCart[i].prettyPrice,
+            qty: retrievedCart[i].qty
+          };
+
+      displayCart.items.push(model);
+      total += (retrievedCart[i].qty * retrievedCart[i].price);
+
+      newCart[retrievedCart[i].item_id] = model;
+
+      console.log('model: ' + JSON.stringify(model, null, 1));
+    }
+
+    if (total == 0) {
+      console.log('No cart info in passport.js');
+      return;
+    }
+
+    req.session.total = displayCart.total = total.toFixed(2);
+
+    console.log(newCart);
+
+//     return newCart;
+    req.session.cart = newCart;
+
+    return next();
+
+//     return;
+  });
+}
+
+// route middleware to make sure a user is logged in
+function isLoggedIn(req, res, next) {
+  //   isLoggedIn : function(req, res, next) {
+
+  // if user is authenticated in the session, carry on
+  if (req.isAuthenticated())
+  {
+    return next();
+  }
+
+  // if they aren't redirect them to the home page
+  res.redirect('../auth/unauth');
+}

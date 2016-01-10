@@ -2,35 +2,22 @@
 
 var mongoose = require('mongoose');
 
-var productModel = function () {
+var cartModel = function () {
 
-  //Define a super simple schema for our products.
+  // Define a super simple schema for our cart.
   var productSchema = mongoose.Schema({
+    username: String,
+    item_id: String,
     name: String,
     volume: Number,
-    price: Number
+    prettyVolume: String,
+    price: Number,
+    prettyPrice: String,
+    qty: Number
   });
 
-  //Verbose toString method
-  productSchema.methods.whatAmI = function () {
-    var greeting = this.name ?
-        'Hello, I\'m a ' + this.name + ' with volume of ' + this.volume + 'mL. I\'m worth $' + this.price
-    : 'I don\'t have a name :(';
-    console.log(greeting);
-  };
-
-  //Format the volume of the product to show unit of measurement
-  productSchema.methods.prettyVolume = function () {
-    return this.volume + ' mL';
-  };
-
-  //Format the price of the product to show a dollar sign, and two decimal places
-  productSchema.methods.prettyPrice = function () {
-    return '$' + this.price.toFixed(2);
-  };
-
-  return mongoose.model('Product', productSchema);
+  return mongoose.model('Cart', productSchema);
 
 };
 
-module.exports = new productModel();
+module.exports = new cartModel();

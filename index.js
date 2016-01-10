@@ -4,8 +4,8 @@ var express  = require('express');
 var kraken   = require('kraken-js');
 var db       = require('./lib/database');
 
-// var passport = require('passport');
-var flash    = require('connect-flash');
+//var passport = require('passport');
+//var flash    = require('connect-flash');
 
 var options, app;
 
@@ -25,9 +25,9 @@ app = module.exports = express();
 
 app.use(kraken(options));
 
-/* app.use(passport.initialize());
-app.use(passport.session()); // persistent login sessions
-app.use(flash()); // use connect-flash for flash messages stored in session */
+//app.use(passport.initialize());
+//app.use(passport.session()); // persistent login sessions
+// app.use(flash()); // use connect-flash for flash messages stored in session
 
 /* app.use(function(req, res, next) {
   if (isIPAllowed(req.ip)) {
