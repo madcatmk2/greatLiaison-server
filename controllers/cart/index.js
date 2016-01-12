@@ -9,7 +9,39 @@ var productModel = require('../../models/productModel');
 var cartModel = require('../../models/cartModel');
 
 // For testing Paypal SDK
-var savedCard = {
+
+var create_payment_json = {
+  "intent": "sale",
+  "payer": {
+    "payment_method": "paypal"
+  },
+  "redirect_urls": {
+    "return_url": "http://google.com",
+    "cancel_url": "http://yahoo.com"
+  },
+  "transactions": [{
+    "item_list": {
+      "items": [{
+        "name": "Cream",
+        "sku": "CREAMSKU001",
+        "price": "40.00",
+        "currency": "HKD",
+        "quantity": 1
+      }]
+    },
+    "amount": {
+      "currency": "HKD",
+      "total": "40.00"
+    },
+    "description": "This is the payment description."
+  }]
+};
+
+/*
+ *  Commented by Hason Ng on 20160112:
+ *  We are not storing any CC information so this is an irrelevant method of payment
+ */
+/* var savedCard = {
   "type": "visa",
   "number": "4417119669820331",
   "expire_month": "11",
@@ -17,16 +49,24 @@ var savedCard = {
   "cvv2": "123",
   "first_name": "Joe",
   "last_name": "Shopper"
-};
+}; */
 
 module.exports = function (router) {
   require('../auth/passport')(router);
 
   paypal.configure(paypalConfig);
 
-  router.post('/payByCreditCard', function (req, res) {
-    checkoutByCreditCard(req, res);
+  router.post('/payByPaypal', function (req, res) {
+    checkoutByPaypal(req, res);
   });
+
+  /*
+ *  Commented by Hason Ng on 20160112:
+ *  We are not storing any CC information so this is an irrelevant method of payment
+ */
+/*   router.post('/payByCreditCard', function (req, res) {
+    checkoutByCreditCard(req, res);
+  }); */
 
   /**
     * Returns the current shopping cart
@@ -280,7 +320,24 @@ function isLoggedIn(req, res, next) {
   res.redirect('../auth/unauth');
 }
 
-function checkoutByCreditCard(req, res) {
+function checkoutByPaypal(req, res) {
+  paypal.payment.create(create_payment_json, function (err, payment) {
+    if (err) {
+      console.log(err);
+      res.json({ message: err });
+    } else {
+      console.log("Create Payment Response");
+      console.log(JSON.stringify(payment));
+      res.json({ message: payment });
+    }
+  });
+}
+
+/*
+ *  Commented by Hason Ng on 20160112:
+ *  We are not storing any CC information so this is an irrelevant method of payment
+ */
+/* function checkoutByCreditCard(req, res) {
   paypal.creditCard.create(savedCard, function (err, credit_card) {
     if (err) {
       console.log(err);
@@ -291,4 +348,4 @@ function checkoutByCreditCard(req, res) {
       res.json({ message: credit_card });
     }
   });
-}
+} */
