@@ -10,8 +10,8 @@ var userSchema = mongoose.Schema({
   local            : {
     email        : String,
     password     : String,
-  },
-  facebook         : {
+  }
+/*   facebook         : {
     id           : String,
     token        : String,
     email        : String,
@@ -28,8 +28,7 @@ var userSchema = mongoose.Schema({
     token        : String,
     email        : String,
     name         : String
-  }
-
+  } */
 });
 
 // methods ======================

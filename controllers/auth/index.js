@@ -1,9 +1,9 @@
 'use strict';
 
-var passport  = require('passport');
-// var flash     = require('connect-flash');
+var passport        = require('passport');
+// var flash           = require('connect-flash');
 
-var cartModel = require('../../models/cartModel');
+var UserData        = require('../../models/userData');
 
 module.exports = function (app) {
   require('./passport')(app);
@@ -51,12 +51,42 @@ module.exports = function (app) {
   // we will want this protected so you have to be logged in to visit
   // we will use route middleware to verify this (the isLoggedIn function)
   app.get('/profile', isLoggedIn, function(req, res) {
-
-//     req.session.cart = loadCartFromDB(req);
-
     res.json({ message: 'Profile' });
 /*     res.render('profile.ejs', {
       user : req.user // get the user out of session and pass to template
+    }); */
+  });
+
+  app.post('/profile/updateUserProfile', function(req, res) {
+    var newUserData = new UserData();
+    newUserData.username = req.user.local.email;
+    newUserData.save(function(err) {
+      if(err) {
+        console.log('profile error', err);
+      }
+
+      res.json({ message: err });
+    });
+/*     var query = {
+      username: req.user.local.email,
+    };
+    var update = {
+      username: req.user.local.email,
+      name: req.param("name"),
+      volume: prod.volume,
+      prettyVolume: prod.prettyVolume(),
+      price: prod.price,
+      prettyPrice: prod.prettyPrice(),
+      qty: cart[id].qty
+    };
+    var options = { upsert: true };
+
+    UserData.findOneAndUpdate(query, update, options, function(err, updateCart) {
+      if(err) {
+        console.log('Update cart error', err);
+      }
+
+      console.log(updateCart);
     }); */
   });
 
@@ -78,7 +108,6 @@ module.exports = function (app) {
 
 // route middleware to make sure a user is logged in
 function isLoggedIn(req, res, next) {
-  //   isLoggedIn : function(req, res, next) {
 
   // if user is authenticated in the session, carry on
   if (req.isAuthenticated())
