@@ -59,14 +59,63 @@ module.exports = function (app) {
 
   app.post('/profile/updateUserProfile', function(req, res) {
     var newUserData = new UserData();
-    newUserData.username = req.user.local.email;
-    newUserData.save(function(err) {
+/*     newUserData.username = req.user.local.email;
+
+    newUserData.personalInfo.givenName = req.param('givenName');
+    newUserData.personalInfo.middleName = req.param('middleName');
+    newUserData.personalInfo.familyName = req.param('familyName');
+    newUserData.personalInfo.mobileNumber = req.param('mobileNumber');
+
+    newUserData.shippingInfo.fullName = req.param('fullName');
+    newUserData.shippingInfo.phoneNumber = req.param('phoneNumber');
+    newUserData.shippingInfo.address1 = req.param('address1');
+    newUserData.shippingInfo.address2 = req.param('address2');
+    newUserData.shippingInfo.city = req.param('city');
+    newUserData.shippingInfo.county = req.param('county');
+    newUserData.shippingInfo.postalCode = req.param('postalCode');
+    newUserData.shippingInfo.country = req.param('country'); */
+/*
+    console.log(req);
+    console.log(req.params); */
+
+    var query = {
+      username: req.user.local.email,
+    };
+    var update = {
+      'personalInfo.givenName': req.param('givenName'),
+      'personalInfo.middleName': req.param('middleName'),
+      'personalInfo.familyName': req.param('familyName'),
+      'personalInfo.mobileNumber': req.param('mobileNumber'),
+
+      'shippingInfo.fullName': req.param('fullName'),
+      'shippingInfo.phoneNumber': req.param('phoneNumber'),
+      'shippingInfo.address1': req.param('address1'),
+      'shippingInfo.address2': req.param('address2'),
+      'shippingInfo.city': req.param('city'),
+      'shippingInfo.county': req.param('county'),
+      'shippingInfo.postalCode': req.param('postalCode'),
+      'shippingInfo.country': req.param('country')
+    };
+    var options = { upsert: true };
+
+    UserData.findOneAndUpdate(query, update, options, function(err, updateUserData) {
+      if(err) {
+        console.log('Update user data error', err);
+      }
+
+      console.log(updateUserData);
+
+      res.json({ message: 'Done' });
+    });
+
+/*     newUserData.save(function(err) {
       if(err) {
         console.log('profile error', err);
       }
 
       res.json({ message: err });
-    });
+    }); */
+
 /*     var query = {
       username: req.user.local.email,
     };
