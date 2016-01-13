@@ -6,14 +6,14 @@ var passport        = require('passport');
 var UserData        = require('../../models/userData');
 
 module.exports = function (app) {
-  require('./passport')(app);
+    require('./passport')(app);
 
-  // =====================================
-  // HOME PAGE ===========================
-  // =====================================
-  app.get('/', function(req, res) {
+    // =====================================
+    // HOME PAGE ===========================
+    // =====================================
+    app.get('/', function(req, res) {
     res.json({ message: 'Authentication route' });
-  });
+});
 
   // =====================================
   // LOGIN ===============================
