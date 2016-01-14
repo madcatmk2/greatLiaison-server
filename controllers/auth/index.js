@@ -51,15 +51,26 @@ module.exports = function (app) {
   // we will want this protected so you have to be logged in to visit
   // we will use route middleware to verify this (the isLoggedIn function)
   app.get('/profile', isLoggedIn, function(req, res) {
-    res.json({ message: 'Profile' });
+    var query = {
+      username: req.user.local.email,
+    };
+    UserData.find(query, '-_id -__v', function (err, userData) {
+        if (err) {
+          console.log(err);
+        }
+
+        res.json({ message: userData });
+      });
+
+//     res.json({ message: 'Profile' });
 /*     res.render('profile.ejs', {
       user : req.user // get the user out of session and pass to template
     }); */
   });
 
   app.post('/profile/updateUserProfile', function(req, res) {
-    var newUserData = new UserData();
-/*     newUserData.username = req.user.local.email;
+/*    var newUserData = new UserData();
+    newUserData.username = req.user.local.email;
 
     newUserData.personalInfo.givenName = req.param('givenName');
     newUserData.personalInfo.middleName = req.param('middleName');
