@@ -8,14 +8,12 @@ var userDataSchema = mongoose.Schema({
 
   username       : String,
   personalInfo   : {
-//     username     : String,
     givenName    : String,
     middleName   : String,
     familyName   : String,
     mobileNumber : Number
   },
   shippingInfo   : {
-//     username     : String,
     fullName     : String,
     phoneNumber  : Number,
     address1     : String,
