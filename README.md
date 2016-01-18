@@ -1,4 +1,4 @@
 greatliaison
 ===========
 
-Online store!
+Online store for Great Liaison!
