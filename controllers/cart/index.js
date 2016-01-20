@@ -8,6 +8,10 @@ var auth = require('../auth/index');
 var productModel = require('../../models/productModel');
 var cartModel = require('../../models/cartModel');
 
+var cartModel2 = require('../../models/cartModel2');
+var userCarts = require('mongoose').model('userCarts');
+var cartItems = require('mongoose').model('cartItems');
+
 // For testing Paypal SDK
 
 var create_payment_json = {
@@ -16,8 +20,8 @@ var create_payment_json = {
     "payment_method": "paypal"
   },
   "redirect_urls": {
-    "return_url": "http://google.com",
-    "cancel_url": "http://yahoo.com"
+    "return_url": "127.0.0.1:8000/cart/paymentSuccess",
+    "cancel_url": "127.0.0.1:8000/cart/"
   },
   "transactions": [{
     "item_list": {
@@ -60,7 +64,12 @@ module.exports = function (router) {
     checkoutByPaypal(req, res);
   });
 
-  /*
+  router.get('/paymentSuccess', function (req, res) {
+
+//     res.json({ message: 'payment OK' });
+  });
+
+/*
  *  Commented by Hason Ng on 20160112:
  *  We are not storing any CC information so this is an irrelevant method of payment
  */
@@ -80,7 +89,7 @@ module.exports = function (router) {
 
     console.log('session cart: ' + cart);
 
-    if (!cart) {
+/*     if (!cart) {
       console.log('Session cart not found, searching DB');
 //       console.log('username: ' + req.user.local.email);
 
@@ -105,18 +114,18 @@ module.exports = function (router) {
         for (var i = 0; i < retrievedCart.length; i++) {
           var model =
               {
-                name: retrievedCart[i].name,
-                volume: retrievedCart[i].volume,
-                prettyVolume: retrievedCart[i].prettyVolume,
-                price: retrievedCart[i].price,
-                prettyPrice: retrievedCart[i].prettyPrice,
-                qty: retrievedCart[i].qty
+                name: retrievedCart[i].cartItem.name,
+                volume: retrievedCart[i].cartItem.volume,
+                prettyVolume: retrievedCart[i].cartItem.prettyVolume,
+                price: retrievedCart[i].cartItem.price,
+                prettyPrice: retrievedCart[i].cartItem.prettyPrice,
+                qty: retrievedCart[i].cartItem.qty
               };
 
           displayCart.items.push(model);
-          total += (retrievedCart[i].qty * retrievedCart[i].price);
+          total += (retrievedCart[i].cartItem.qty * retrievedCart[i].cartItem.price);
 
-          newCart[retrievedCart[i].item_id] = model;
+          newCart[retrievedCart[i].cartItem.item_id] = model;
         }
 
         if (total == 0) {
@@ -130,8 +139,13 @@ module.exports = function (router) {
         res.json({ message: displayCart });
         return;
       });
-    } else {
-      console.log('Session cart found');
+    } else { */
+//       console.log('Session cart found');
+
+      if (!cart) {
+        res.json({ message: 'Your cart is empty! (2a)' });
+        return;
+      }
 
       // Display products in session's cart
       for (var item in cart) {
@@ -150,15 +164,14 @@ module.exports = function (router) {
 
       req.session.total = displayCart.total = total.toFixed(2);
 
-//       res.json({ message: JSON.stringify(displayCart, null, 1) });
       res.json({ message: displayCart });
-    }
+//     }
   });
 
   /**
     * Adds an item to the shopping cart
     */
-  router.post('/', function (req, res) {
+  router.post('/', isLoggedIn, loadCartFromDB, function (req, res) {
     //Load (or initialize) the cart
     req.session.cart = req.session.cart || {};
     var cart = req.session.cart;
@@ -194,7 +207,9 @@ module.exports = function (router) {
 
 //       var newCart = new cartModel({ username: req.user.local.email, items: cart });
 
-      var query = {
+      updateDBCart(req, cart, prod);
+
+/*       var query = {
         username: req.user.local.email,
         item_id: id
       };
@@ -215,7 +230,7 @@ module.exports = function (router) {
         }
 
         console.log(updateCart);
-      });
+      }); */
 
       res.json({ message: 'Item added' });
 
@@ -225,7 +240,7 @@ module.exports = function (router) {
   /**
     * Deletes an item from the shopping cart
     */
-  router.delete('/', function (req, res) {
+  router.delete('/deleteOne', function (req, res) {
     //Load (or initialize) the cart
     req.session.cart = req.session.cart || {};
     var cart = req.session.cart;
@@ -236,21 +251,114 @@ module.exports = function (router) {
     //Remove or decrease the product quantity in the shopping cart.
     if (cart[id]) {
       cart[id].qty--;
-      if (cart[id].qty <= 0) {
-        cart[id] = null;
-      }
+
+      productModel.findById(id, function (err, prod) {
+        if (err) {
+          console.log('Error searching product: ', err);
+          res.json({ message: 'Error searching product: ' + err });
+          return;
+        } else if (id == null || prod == null) {
+          res.json({ message: 'Product not found' });
+          return;
+        }
+
+        if (cart[id].qty <= 0) {
+          cart[id] = null;
+
+          removeFromDBCart(req, cart, prod);
+        } else {
+          updateDBCart(req, cart, prod);
+        }
+      });
 
       res.json({ message: 'Item removed from cart' });
     } else {
       res.json({ message: 'Item does not exist in cart' });
     }
   });
+
+  /**
+    * Clears the cart entirely
+    */
+  router.delete('/deleteAll', function (req, res) {
+    //Load (or initialize) the cart
+    req.session.cart = {};
+
+    removeAllFromDBCart(req);
+
+    res.json({ message: 'All items removed from cart' });
+  });
 };
 
 function loadCartFromDB(req, res, next) {
+  // cartModel2.find({ 'username': req.user.local.email }, null, function (err, retrievedCart) {
+  userCarts.find({ 'username': req.user.local.email }, function(err, retrievedCart) {
+    console.log('new cart 222: ' + retrievedCart);
+
+    /*var displayCart = {items: [], total: 0},
+        total = 0;*/
+    var total = 0;
+
+    if (err) {
+      console.log(err);
+    }
+
+    if (req.session.cart) {
+      console.log('Session already has cart');
+      return next();
+    }
+
+    if (!retrievedCart) {
+      console.log('No cart found in DB');
+      return next();
+    }
+
+    // console.log('retrievedCart[0]: ' + retrievedCart[0]);
+
+    var newCart = {};
+    var retrievedCartItems = retrievedCart[0].cartItems;
+    console.log('retrievedCartItems: ' + retrievedCartItems);
+
+    // Query each item data and add to cart
+    for (var i = 0; i < retrievedCartItems.length; i++) {
+      /*var model =
+          {
+            name: retrievedCart[i].name,
+            volume: retrievedCart[i].volume,
+            prettyVolume: retrievedCart[i].prettyVolume,
+            price: retrievedCart[i].price,
+            prettyPrice: retrievedCart[i].prettyPrice,
+            qty: retrievedCart[i].qty
+          };*/
+
+      // displayCart.items.push(cartItems[i]);
+      total += (retrievedCartItems[i].qty * retrievedCartItems[i].price);
+
+      newCart[retrievedCartItems[i].item_id] = retrievedCartItems[i];
+
+      console.log('retrievedCartItems[' + i + ']: ' + JSON.stringify(retrievedCartItems[i], null, 1));
+    }
+
+    if (total == 0) {
+      console.log('No cart info in DB');
+      return next();
+    }
+
+    console.log('DB cart found');
+
+    // req.session.total = displayCart.total = total.toFixed(2);
+    req.session.total = total.toFixed(2);
+
+    console.log(newCart);
+
+    req.session.cart = newCart;
+
+    return next();
+  });
 
   // Try to retrieve cart from database from previous session
-  cartModel.find({ 'username': req.user.local.email }, '-_id -username -__v', function (err, retrievedCart) {
+  /*cartModel.find({ 'username': req.user.local.email }, '-_id -username -__v', function (err, retrievedCart) {
+    console.log('retrievedCart: ' + retrievedCart);
 
     var displayCart = {items: [], total: 0},
         total = 0;
@@ -259,12 +367,15 @@ function loadCartFromDB(req, res, next) {
       console.log(err);
     }
 
-    if (!retrievedCart) {
-      console.log('No cart found in passport.js');
-      return;
+    if (req.session.cart) {
+      console.log('Session already has cart');
+      return next();
     }
 
-    console.log('retrievedCart: ' + retrievedCart);
+    if (!retrievedCart) {
+      console.log('No cart found in DB');
+      return next();
+    }
 
     var newCart = {};
 
@@ -289,9 +400,11 @@ function loadCartFromDB(req, res, next) {
     }
 
     if (total == 0) {
-      console.log('No cart info in passport.js');
-      return;
+      console.log('No cart info in DB');
+      return next();
     }
+
+    console.log('DB cart found');
 
     req.session.total = displayCart.total = total.toFixed(2);
 
@@ -301,9 +414,7 @@ function loadCartFromDB(req, res, next) {
     req.session.cart = newCart;
 
     return next();
-
-//     return;
-  });
+  });*/
 }
 
 // route middleware to make sure a user is logged in
@@ -320,6 +431,124 @@ function isLoggedIn(req, res, next) {
   res.redirect('../auth/unauth');
 }
 
+function updateDBCart(req, cart, prod) {
+  var id = req.param('item_id');
+
+  console.log('cart: ' + JSON.stringify(cart));
+  console.log('prod: ' + JSON.stringify(prod));
+  console.log('id: ' + id);
+
+  var query = {
+    'username': req.user.local.email,
+    'cartItem.item_id': id
+  };
+  var update = {
+    'username': req.user.local.email,
+    'cartItem.item_id': id,
+    'cartItem.name': prod.name,
+    'cartItem.volume': prod.volume,
+    'cartItem.prettyVolume': prod.prettyVolume(),
+    'cartItem.price': prod.price,
+    'cartItem.prettyPrice': prod.prettyPrice(),
+    'cartItem.qty': cart[id].qty
+  };
+  var options = { upsert: true };
+
+  cartModel.findOneAndUpdate(query, update, options, function(err, updateCart) {
+    if(err) {
+      console.log('Update cart error', err);
+    }
+
+    console.log('updateCart: ' + updateCart);
+  });
+
+  cartModel2.find({ 'username': req.user.local.email }, '-_id -username -__v', function (err, retrievedCart) {
+    console.log('existing cart: ' + retrievedCart);
+
+    var userCart = new userCarts();
+    // console.log('userCart: ' + userCart);
+//     var userCart = new cartModel2.userCart();
+
+//     if(cart == null || cart.length == 0) {
+    if(retrievedCart == null || retrievedCart.length == 0) {
+      var cartItem = new cartItems();
+      cartItem.item_id = id;
+      cartItem.name = prod.name;
+      cartItem.volume = prod.volume;
+      cartItem.prettyVolume = prod.prettyVolume();
+      cartItem.price = prod.price;
+      cartItem.prettyPrice = prod.prettyPrice();
+      cartItem.qty = cart[id].qty;
+
+      userCart.username = req.user.local.email;
+      userCart.cartItems = cartItem;
+//       console.log('debug: ' + cartModel2.schema);
+
+      userCart.save(function(err, updateCart) {
+        console.log('new cart 222: ' + updateCart);
+      });
+
+    } else {
+      // var cartItem = new cartItems();
+      // cartItem.item_id = id,
+      // cartItem.name = prod.name,
+      // cartItem.volume = prod.volume,
+      // cartItem.prettyVolume = prod.prettyVolume(),
+      // cartItem.price = prod.price,
+      // cartItem.prettyPrice = prod.prettyPrice(),
+      // cartItem.qty = cart[id].qty + 1
+
+      var query2 = {
+        'username': req.user.local.email,
+        'cartItems.item_id': id
+      };
+      var update2 = {
+        '$set': {
+          'cartItems.$.name': prod.name,
+          'cartItems.$.volume': prod.volume,
+          'cartItems.$.prettyVolume': prod.prettyVolume(),
+          'cartItems.$.price': prod.price,
+          'cartItems.$.prettyPrice': prod.prettyPrice(),
+          'cartItems.$.qty': cart[id].qty + 1
+        }
+      };
+
+      userCart.update(query2, update2, function(err, updateCart) {
+        console.log('updateCart 222: ' + updateCart);
+      });
+    }
+  });
+}
+
+function removeFromDBCart(req, cart, prod) {
+  var query = {
+    'username': req.user.local.email,
+    'cartItem.item_id': id
+  };
+
+  cartModel.remove(query, function(err, updateCart) {
+    if(err) {
+      console.log('Update cart error', err);
+    }
+
+    console.log(updateCart);
+  });
+}
+
+function removeAllFromDBCart(req) {
+  var query = {
+    'username': req.user.local.email
+  };
+
+  cartModel.remove(query, function(err, updateCart) {
+    if(err) {
+      console.log('Update cart error', err);
+    }
+
+    console.log(updateCart);
+  });
+}
+
 function checkoutByPaypal(req, res) {
   paypal.payment.create(create_payment_json, function (err, payment) {
     if (err) {
@@ -328,7 +557,16 @@ function checkoutByPaypal(req, res) {
     } else {
       console.log("Create Payment Response");
       console.log(JSON.stringify(payment));
-      res.json({ message: payment });
+
+      var index, len;
+      var links = payment.links;
+      for (index = 0, len = links.length; index < len; index++) {
+        if (links[index].rel == "approval_url") {
+          res.redirect(links[index].href);
+        }
+      }
+
+//       res.json({ message: payment });
     }
   });
 }

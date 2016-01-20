@@ -6,14 +6,14 @@ var passport        = require('passport');
 var UserData        = require('../../models/userData');
 
 module.exports = function (app) {
-    require('./passport')(app);
+  require('./passport')(app);
 
-    // =====================================
-    // HOME PAGE ===========================
-    // =====================================
-    app.get('/', function(req, res) {
+  // =====================================
+  // HOME PAGE ===========================
+  // =====================================
+  app.get('/', function(req, res) {
     res.json({ message: 'Authentication route' });
-});
+  });
 
   // =====================================
   // LOGIN ===============================
@@ -45,22 +45,28 @@ module.exports = function (app) {
 //     failureFlash : true // allow flash messages
   }));
 
-  // =====================================
-  // PROFILE SECTION =====================
-  // =====================================
-  // we will want this protected so you have to be logged in to visit
-  // we will use route middleware to verify this (the isLoggedIn function)
+
+  /**
+   * @api {get} /profile Get user profile
+   * @apiName GetProfile
+   * @apiGroup User
+   *
+   * @apiParam {String} id Users unique ID.
+   *
+   * @apiSuccess {Object} userData Profile data of the User.
+   */
+
   app.get('/profile', isLoggedIn, function(req, res) {
     var query = {
       username: req.user.local.email,
     };
     UserData.find(query, '-_id -__v', function (err, userData) {
-        if (err) {
-          console.log(err);
-        }
+      if (err) {
+        console.log(err);
+      }
 
-        res.json({ message: userData });
-      });
+      res.json({ message: userData });
+    });
 
 //     res.json({ message: 'Profile' });
 /*     res.render('profile.ejs', {
@@ -69,24 +75,7 @@ module.exports = function (app) {
   });
 
   app.post('/profile/updateUserProfile', function(req, res) {
-/*    var newUserData = new UserData();
-    newUserData.username = req.user.local.email;
-
-    newUserData.personalInfo.givenName = req.param('givenName');
-    newUserData.personalInfo.middleName = req.param('middleName');
-    newUserData.personalInfo.familyName = req.param('familyName');
-    newUserData.personalInfo.mobileNumber = req.param('mobileNumber');
-
-    newUserData.shippingInfo.fullName = req.param('fullName');
-    newUserData.shippingInfo.phoneNumber = req.param('phoneNumber');
-    newUserData.shippingInfo.address1 = req.param('address1');
-    newUserData.shippingInfo.address2 = req.param('address2');
-    newUserData.shippingInfo.city = req.param('city');
-    newUserData.shippingInfo.county = req.param('county');
-    newUserData.shippingInfo.postalCode = req.param('postalCode');
-    newUserData.shippingInfo.country = req.param('country'); */
-/*
-    console.log(req);
+/*     console.log(req);
     console.log(req.params); */
 
     var query = {
