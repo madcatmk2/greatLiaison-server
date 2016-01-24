@@ -265,7 +265,7 @@ module.exports = function (router) {
         if (cart[id].qty <= 0) {
           cart[id] = null;
 
-          removeFromDBCart(req, cart, prod);
+          removeFromDBCart(req, id);
         } else {
           updateDBCart(req, cart, prod);
         }
@@ -313,6 +313,11 @@ function loadCartFromDB(req, res, next) {
       return next();
     }
 
+    /*if (retrieve) {
+      console.log('No cart info in DB');
+      return next();
+    }*/
+
     // console.log('retrievedCart[0]: ' + retrievedCart[0]);
 
     var newCart = {};
@@ -337,11 +342,6 @@ function loadCartFromDB(req, res, next) {
       newCart[retrievedCartItems[i].item_id] = retrievedCartItems[i];
 
       console.log('retrievedCartItems[' + i + ']: ' + JSON.stringify(retrievedCartItems[i], null, 1));
-    }
-
-    if (total == 0) {
-      console.log('No cart info in DB');
-      return next();
     }
 
     console.log('DB cart found');
@@ -438,7 +438,7 @@ function updateDBCart(req, cart, prod) {
   console.log('prod: ' + JSON.stringify(prod));
   console.log('id: ' + id);
 
-  var query = {
+  /*var query = {
     'username': req.user.local.email,
     'cartItem.item_id': id
   };
@@ -460,44 +460,62 @@ function updateDBCart(req, cart, prod) {
     }
 
     console.log('updateCart: ' + updateCart);
-  });
+  });*/
 
-  cartModel2.find({ 'username': req.user.local.email }, '-_id -username -__v', function (err, retrievedCart) {
-    console.log('existing cart: ' + retrievedCart);
 
-    var userCart = new userCarts();
-    // console.log('userCart: ' + userCart);
-//     var userCart = new cartModel2.userCart();
 
-//     if(cart == null || cart.length == 0) {
-    if(retrievedCart == null || retrievedCart.length == 0) {
-      var cartItem = new cartItems();
-      cartItem.item_id = id;
-      cartItem.name = prod.name;
-      cartItem.volume = prod.volume;
-      cartItem.prettyVolume = prod.prettyVolume();
-      cartItem.price = prod.price;
-      cartItem.prettyPrice = prod.prettyPrice();
-      cartItem.qty = cart[id].qty;
+  /*userCarts.find({ 'username': req.user.local.email, 'cartItems.items_id': id }, function(err, retrievedCart) {
+    console.log('new cart 222: ' + retrievedCart);
 
-      userCart.username = req.user.local.email;
-      userCart.cartItems = cartItem;
-//       console.log('debug: ' + cartModel2.schema);
+    var displayCart = {items: [], total: 0},
+        total = 0;
+    var total = 0;
 
-      userCart.save(function(err, updateCart) {
-        console.log('new cart 222: ' + updateCart);
-      });
+    if (err) {
+      console.log(err);
+    }
 
-    } else {
-      // var cartItem = new cartItems();
-      // cartItem.item_id = id,
-      // cartItem.name = prod.name,
-      // cartItem.volume = prod.volume,
-      // cartItem.prettyVolume = prod.prettyVolume(),
-      // cartItem.price = prod.price,
-      // cartItem.prettyPrice = prod.prettyPrice(),
-      // cartItem.qty = cart[id].qty + 1
+    if (req.session.cart) {
+      console.log('Session already has cart');
+      return next();
+    }
 
+    if (!retrievedCart) {
+      console.log('No cart found in DB');
+      return next();
+    }
+
+    /*if (retrieve) {
+      console.log('No cart info in DB');
+      return next();
+    }*/
+
+    // console.log('retrievedCart[0]: ' + retrievedCart[0]);
+
+    /*var newCart = {};
+    var retrievedCartItems = retrievedCart[0].cartItems;
+    console.log('retrievedCartItems: ' + retrievedCartItems);*/
+
+
+
+  userCarts.find({ 'username': req.user.local.email }, function(err, retrievedCart) {
+  // cartModel2.find({ 'username': req.user.local.email, 'cartItems.items_id': id }, '-_id -username -__v', function (err, retrievedCart) {
+    console.log('updateDBcart existing cart: ' + retrievedCart);
+
+    var foundId;
+    var retrievedCartItems = retrievedCart[0].cartItems;
+
+    // Query each item data and try to find item ID
+    for (var i = 0; i < retrievedCartItems.length; i++) {
+
+      if(retrievedCartItems[i].item_id == id) {
+        foundId = id;
+
+        break;
+      }
+    }
+
+    if(foundId != null) {
       var query2 = {
         'username': req.user.local.email,
         'cartItems.item_id': id
@@ -509,44 +527,169 @@ function updateDBCart(req, cart, prod) {
           'cartItems.$.prettyVolume': prod.prettyVolume(),
           'cartItems.$.price': prod.price,
           'cartItems.$.prettyPrice': prod.prettyPrice(),
-          'cartItems.$.qty': cart[id].qty + 1
+          'cartItems.$.qty': cart[id].qty
         }
       };
 
-      userCart.update(query2, update2, function(err, updateCart) {
-        console.log('updateCart 222: ' + updateCart);
+      // userCart.update(query2, update2, function(err, updateCart) {
+      cartModel2.update(query2, update2, function(err, updateCart) {
+        console.log('updateCart with existing item 222: ' + updateCart);
+      });
+    } else {
+      var cartItem = new cartItems();
+      cartItem.item_id = id;
+      cartItem.name = prod.name;
+      cartItem.volume = prod.volume;
+      cartItem.prettyVolume = prod.prettyVolume();
+      cartItem.price = prod.price;
+      cartItem.prettyPrice = prod.prettyPrice();
+      cartItem.qty = cart[id].qty;
+
+      var query2 = {
+        'username': req.user.local.email,
+      };
+      var update2 = {
+        '$push': {
+          'cartItems': cartItem
+        }
+      };
+
+      cartModel2.update(query2, update2, function(err, updateCart) {
+        console.log('updateCart with new item 222: ' + updateCart);
       });
     }
+
+    // var userCart = new userCarts();
+
+    //if(retrievedCart == null || retrievedCart[0].length == 0) {
+      /*var cartItem = new cartItems();
+      cartItem.item_id = id;
+      cartItem.name = prod.name;
+      cartItem.volume = prod.volume;
+      cartItem.prettyVolume = prod.prettyVolume();
+      cartItem.price = prod.price;
+      cartItem.prettyPrice = prod.prettyPrice();
+      cartItem.qty = cart[id].qty;*/
+
+      /*userCart.username = req.user.local.email;
+      userCart.cartItems = cartItem;
+//       console.log('debug: ' + cartModel2.schema);
+
+      userCart.save(function(err, updateCart) {
+        console.log('new cart 222: ' + updateCart);
+      });*/
+
+      /*var query2 = {
+        'username': req.user.local.email,
+      };
+      var update2 = {
+        '$push': {
+          'cartItems': cartItem
+        }
+      };
+
+      // userCart.update(query2, update2, function(err, updateCart) {
+      cartModel2.update(query2, update2, function(err, updateCart) {
+        console.log('updateCart with new item 222: ' + updateCart);
+      });*/
+
+    //} else {
+      // var cartItem = new cartItems();
+      // cartItem.item_id = id,
+      // cartItem.name = prod.name,
+      // cartItem.volume = prod.volume,
+      // cartItem.prettyVolume = prod.prettyVolume(),
+      // cartItem.price = prod.price,
+      // cartItem.prettyPrice = prod.prettyPrice(),
+      // cartItem.qty = cart[id].qty + 1
+
+      /*var query2 = {
+        'username': req.user.local.email,
+        'cartItems.item_id': id
+      };
+      var update2 = {
+        '$set': {
+          'cartItems.$.name': prod.name,
+          'cartItems.$.volume': prod.volume,
+          'cartItems.$.prettyVolume': prod.prettyVolume(),
+          'cartItems.$.price': prod.price,
+          'cartItems.$.prettyPrice': prod.prettyPrice(),
+          'cartItems.$.qty': cart[id].qty
+        }
+      };
+
+      // userCart.update(query2, update2, function(err, updateCart) {
+      cartModel2.update(query2, update2, function(err, updateCart) {
+        console.log('updateCart with existing item 222: ' + updateCart);
+      });*/
+    //}
   });
 }
 
-function removeFromDBCart(req, cart, prod) {
-  var query = {
+function removeFromDBCart(req, id) {
+  /*var query = {
     'username': req.user.local.email,
     'cartItem.item_id': id
+  };*/
+
+  var query2 = {
+    'username': req.user.local.email,
+  };
+  var update2 = {
+    // 'username': req.user.local.email,
+    '$pull': {
+      'cartItems': {
+        'item_id': id
+      }
+    }
   };
 
-  cartModel.remove(query, function(err, updateCart) {
+  cartModel2.update(query2, update2, function(err, updateCart) {
     if(err) {
       console.log('Update cart error', err);
     }
 
-    console.log(updateCart);
+    console.log('removeFromDBCart: ' + updateCart);
   });
+
+  /*cartModel.remove(query, function(err, updateCart) {
+    if(err) {
+      console.log('Update cart error', err);
+    }
+
+    console.log('removeFromDBCart: ' + updateCart);
+  });*/
 }
 
 function removeAllFromDBCart(req) {
-  var query = {
+  /*var query = {
     'username': req.user.local.email
+  };*/
+
+  var query2 = {
+    'username': req.user.local.email,
+  };
+  var update2 = {
+    // 'username': req.user.local.email,
+    'cartItems': []
   };
 
-  cartModel.remove(query, function(err, updateCart) {
+  // userCart.update(query2, update2, function(err, updateCart) {
+  cartModel2.update(query2, update2, function(err, updateCart) {
     if(err) {
       console.log('Update cart error', err);
     }
 
-    console.log(updateCart);
+    console.log('removeAllFromDBCart: ' + updateCart);
   });
+
+  /*cartModel.remove(query, function(err, updateCart) {
+    if(err) {
+      console.log('Update cart error', err);
+    }
+
+    console.log('removeAllFromDBCart: ' + updateCart);
+  });*/
 }
 
 function checkoutByPaypal(req, res) {
