@@ -8,6 +8,10 @@ var User            = require('../../models/user');
 var cartModel2 = require('../../models/cartModel2');
 var userCarts = require('mongoose').model('userCarts');
 
+var orderModel = require('../../models/orderModel');
+var userOrders = require('mongoose').model('userOrders');
+var userOrderHistories = require('mongoose').model('userOrderHistories');
+
 var passport = require('passport');
 
 // expose this function to our passport using module.exports
@@ -81,6 +85,7 @@ module.exports = function(app) {
               throw err;
             }
 
+            // initialize empty cart
             var userCart = new userCarts();
 
             userCart.username = email;
@@ -88,6 +93,16 @@ module.exports = function(app) {
 
             userCart.save(function(err, updateCart) {
               console.log('new user create empty cart: ' + updateCart);
+            });
+
+            // initialize empty order list
+            var userOrder = new userOrders();
+
+            userOrder.username = email;
+            userOrder.orderHistory = [];
+
+            userOrder.save(function(err, updateOrder) {
+              console.log('new user create empty order: ' + updateOrder);
             });
 
             return done(null, newUser);

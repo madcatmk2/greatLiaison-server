@@ -8,7 +8,8 @@ var productModel = function () {
   var productSchema = mongoose.Schema({
     name: String,
     volume: Number,
-    price: Number
+    price: Number,
+    stock: Number
   });
 
   //Verbose toString method

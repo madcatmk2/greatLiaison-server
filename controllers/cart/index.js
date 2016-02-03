@@ -12,6 +12,11 @@ var cartModel2 = require('../../models/cartModel2');
 var userCarts = require('mongoose').model('userCarts');
 var cartItems = require('mongoose').model('cartItems');
 
+var orderModel = require('../../models/orderModel');
+var userOrders = require('mongoose').model('userOrders');
+var userOrders = require('mongoose').model('userOrderHistories');
+var orderItems = require('mongoose').model('orderItems');
+
 // For testing Paypal SDK
 
 var create_payment_json = {
@@ -66,7 +71,28 @@ module.exports = function (router) {
 
   router.get('/paymentSuccess', function (req, res) {
 
-//     res.json({ message: 'payment OK' });
+
+    /*var orderItem = new orderItems();
+    orderItem.item_id = id;
+    orderItem.name = prod.name;
+    orderItem.volume = prod.volume;
+    orderItem.prettyVolume = prod.prettyVolume();
+    orderItem.price = prod.price;
+    orderItem.prettyPrice = prod.prettyPrice();
+    orderItem.qty = cart[id].qty;
+
+    var query2 = {
+      'username': req.user.local.email,
+    };
+    var update2 = {
+      '$push': {
+        'cartItems': cartItem
+      }
+    };
+
+    cartModel2.update(query2, update2, function(err, updateCart) {
+      console.log('updateCart with new item 222: ' + updateCart);
+    });*/
   });
 
 /*
@@ -188,6 +214,9 @@ module.exports = function (router) {
       } else if (id == null || prod == null) {
         res.json({ message: 'Product not found' });
         return;
+      } else if (prod.stock <= 0) {
+        res.json({ message: 'Out of stock'});
+        return;
       }
 
       //Add or increase the product quantity in the shopping cart.
@@ -291,7 +320,7 @@ module.exports = function (router) {
 };
 
 function loadCartFromDB(req, res, next) {
-  // cartModel2.find({ 'username': req.user.local.email }, null, function (err, retrievedCart) {
+  // Try to retrieve cart from database from previous session
   userCarts.find({ 'username': req.user.local.email }, function(err, retrievedCart) {
     console.log('new cart 222: ' + retrievedCart);
 
@@ -355,66 +384,6 @@ function loadCartFromDB(req, res, next) {
 
     return next();
   });
-
-  // Try to retrieve cart from database from previous session
-  /*cartModel.find({ 'username': req.user.local.email }, '-_id -username -__v', function (err, retrievedCart) {
-    console.log('retrievedCart: ' + retrievedCart);
-
-    var displayCart = {items: [], total: 0},
-        total = 0;
-
-    if (err) {
-      console.log(err);
-    }
-
-    if (req.session.cart) {
-      console.log('Session already has cart');
-      return next();
-    }
-
-    if (!retrievedCart) {
-      console.log('No cart found in DB');
-      return next();
-    }
-
-    var newCart = {};
-
-    // Query each item data and add to cart
-    for (var i = 0; i < retrievedCart.length; i++) {
-      var model =
-          {
-            name: retrievedCart[i].name,
-            volume: retrievedCart[i].volume,
-            prettyVolume: retrievedCart[i].prettyVolume,
-            price: retrievedCart[i].price,
-            prettyPrice: retrievedCart[i].prettyPrice,
-            qty: retrievedCart[i].qty
-          };
-
-      displayCart.items.push(model);
-      total += (retrievedCart[i].qty * retrievedCart[i].price);
-
-      newCart[retrievedCart[i].item_id] = model;
-
-      console.log('model: ' + JSON.stringify(model, null, 1));
-    }
-
-    if (total == 0) {
-      console.log('No cart info in DB');
-      return next();
-    }
-
-    console.log('DB cart found');
-
-    req.session.total = displayCart.total = total.toFixed(2);
-
-    console.log(newCart);
-
-//     return newCart;
-    req.session.cart = newCart;
-
-    return next();
-  });*/
 }
 
 // route middleware to make sure a user is logged in
@@ -434,35 +403,9 @@ function isLoggedIn(req, res, next) {
 function updateDBCart(req, cart, prod) {
   var id = req.param('item_id');
 
-  console.log('cart: ' + JSON.stringify(cart));
+  /*console.log('cart: ' + JSON.stringify(cart));
   console.log('prod: ' + JSON.stringify(prod));
-  console.log('id: ' + id);
-
-  /*var query = {
-    'username': req.user.local.email,
-    'cartItem.item_id': id
-  };
-  var update = {
-    'username': req.user.local.email,
-    'cartItem.item_id': id,
-    'cartItem.name': prod.name,
-    'cartItem.volume': prod.volume,
-    'cartItem.prettyVolume': prod.prettyVolume(),
-    'cartItem.price': prod.price,
-    'cartItem.prettyPrice': prod.prettyPrice(),
-    'cartItem.qty': cart[id].qty
-  };
-  var options = { upsert: true };
-
-  cartModel.findOneAndUpdate(query, update, options, function(err, updateCart) {
-    if(err) {
-      console.log('Update cart error', err);
-    }
-
-    console.log('updateCart: ' + updateCart);
-  });*/
-
-
+  console.log('id: ' + id);*/
 
   /*userCarts.find({ 'username': req.user.local.email, 'cartItems.items_id': id }, function(err, retrievedCart) {
     console.log('new cart 222: ' + retrievedCart);
@@ -495,8 +438,6 @@ function updateDBCart(req, cart, prod) {
     /*var newCart = {};
     var retrievedCartItems = retrievedCart[0].cartItems;
     console.log('retrievedCartItems: ' + retrievedCartItems);*/
-
-
 
   userCarts.find({ 'username': req.user.local.email }, function(err, retrievedCart) {
   // cartModel2.find({ 'username': req.user.local.email, 'cartItems.items_id': id }, '-_id -username -__v', function (err, retrievedCart) {
@@ -558,6 +499,19 @@ function updateDBCart(req, cart, prod) {
         console.log('updateCart with new item 222: ' + updateCart);
       });
     }
+
+    var productQuery = {
+      '_id': id
+    }
+    var productUpdate = {
+      '$inc': {
+          'stock': -1
+      }
+    }
+
+    /*productModel.update(productQuery, productUpdate, function(err, updateProduct) {
+      console.log('updateCart subtract product stock: ' + updateProduct);
+    });*/
 
     // var userCart = new userCarts();
 

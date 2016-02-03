@@ -23,7 +23,16 @@ module.exports = function (app) {
 //     res.render('login.ejs', { message: req.flash('loginMessage') });
   });
 
-  // process the login form
+  /**
+   * @api {post} /auth/login Login endpoint
+   * @apiName Login
+   * @apiGroup User
+   *
+   * @apiParam {String} email User's login email.
+   * @apiParam {String} password User's login password.
+   *
+   * @apiSuccess {Redirect} webpage Login redirect to profile of the user.
+   */
   app.post('/login', passport.authenticate('local-login', {
     successRedirect : './profile', // redirect to the secure profile section
     failureRedirect : './login', // redirect back to the signup page if there is an error
@@ -38,16 +47,24 @@ module.exports = function (app) {
 //     res.render('signup.ejs', { message: req.flash('signupMessage') });
   });
 
-  // process the signup form
+ /**
+   * @api {post} /auth/signup Signup endpoint
+   * @apiName Signup
+   * @apiGroup User
+   *
+   * @apiParam {String} email User's login email.
+   * @apiParam {String} password User's login password.
+   *
+   * @apiSuccess {Redirect} webpage Login redirect to profile of the user.
+   */
   app.post('/signup', passport.authenticate('local-signup', {
     successRedirect : './profile', // redirect to the secure profile section
     failureRedirect : './signup', // redirect back to the signup page if there is an error
 //     failureFlash : true // allow flash messages
   }));
 
-
-  /**
-   * @api {get} /profile Get user profile
+ /**
+   * @api {get} /auth/profile Get user profile
    * @apiName GetProfile
    * @apiGroup User
    *
@@ -55,7 +72,6 @@ module.exports = function (app) {
    *
    * @apiSuccess {Object} userData Profile data of the User.
    */
-
   app.get('/profile', isLoggedIn, function(req, res) {
     var query = {
       username: req.user.local.email,
@@ -74,6 +90,27 @@ module.exports = function (app) {
     }); */
   });
 
+  /**
+   * @api {post} /auth/profile/updateUserProfile Update user profile
+   * @apiName UpdateUserProfile
+   * @apiGroup User
+   *
+   * @apiParam {String} givenName User's given name.
+   * @apiParam {String} middleName User's middle name.
+   * @apiParam {String} familyName User's family name.
+   * @apiParam {String} mobileNmber User's mobile number.
+   *
+   * @apiParam {String} fullName User's full name.
+   * @apiParam {String} phoneNumber User's phone number.
+   * @apiParam {String} address1 User's address.
+   * @apiParam {String} address2 User's additional address (if any).
+   * @apiParam {String} city User's city of residence.
+   * @apiParam {String} county User's resident county.
+   * @apiParam {String} postalCode User's postal code.
+   * @apiParam {String} country User's country of residence.
+   *
+   * @apiSuccess {String} result Result of update.
+   */
   app.post('/profile/updateUserProfile', function(req, res) {
 /*     console.log(req);
     console.log(req.params); */
@@ -107,36 +144,6 @@ module.exports = function (app) {
 
       res.json({ message: 'Done' });
     });
-
-/*     newUserData.save(function(err) {
-      if(err) {
-        console.log('profile error', err);
-      }
-
-      res.json({ message: err });
-    }); */
-
-/*     var query = {
-      username: req.user.local.email,
-    };
-    var update = {
-      username: req.user.local.email,
-      name: req.param("name"),
-      volume: prod.volume,
-      prettyVolume: prod.prettyVolume(),
-      price: prod.price,
-      prettyPrice: prod.prettyPrice(),
-      qty: cart[id].qty
-    };
-    var options = { upsert: true };
-
-    UserData.findOneAndUpdate(query, update, options, function(err, updateCart) {
-      if(err) {
-        console.log('Update cart error', err);
-      }
-
-      console.log(updateCart);
-    }); */
   });
 
   // =====================================
