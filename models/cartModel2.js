@@ -18,6 +18,7 @@ var cartModelSchema = mongoose.Schema({
 // var cartModel = function () {
 
   username      : String,
+  cartStatus	: String,
   cartItems     : [cartItemModelSchema]
 });
 

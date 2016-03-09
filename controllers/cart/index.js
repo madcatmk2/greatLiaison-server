@@ -14,8 +14,8 @@ var cartItems = require('mongoose').model('cartItems');
 
 var orderModel = require('../../models/orderModel');
 var userOrders = require('mongoose').model('userOrders');
-var userOrders = require('mongoose').model('userOrderHistories');
-var orderItems = require('mongoose').model('orderItems');
+var userOrderHistories = require('mongoose').model('userOrderHistories');
+// var orderItems = require('mongoose').model('orderItems');
 
 // For testing Paypal SDK
 
@@ -69,30 +69,39 @@ module.exports = function (router) {
     checkoutByPaypal(req, res);
   });
 
-  router.get('/paymentSuccess', function (req, res) {
+  router.post('/paymentSuccess', isLoggedIn, loadCartFromDB, function (req, res) {
 
+    var cart = req.session.cart,
+        total = req.session.total,
+        cart_id = req.session.cart_id;
 
-    /*var orderItem = new orderItems();
-    orderItem.item_id = id;
-    orderItem.name = prod.name;
-    orderItem.volume = prod.volume;
-    orderItem.prettyVolume = prod.prettyVolume();
-    orderItem.price = prod.price;
-    orderItem.prettyPrice = prod.prettyPrice();
-    orderItem.qty = cart[id].qty;
+    console.log(cart);
 
-    var query2 = {
+    var userOrderHistory = new userOrderHistories();
+    userOrderHistory.orderCartId = cart_id;
+    userOrderHistory.orderStatus = "Pending";
+    userOrderHistory.orderTotal = total;
+    userOrderHistory.orderNumber = "GLLORDER01"
+    userOrderHistory.orderDate = Date.now();
+
+    console.log('userOrderHistory: ' + userOrderHistory)
+
+    var query = {
       'username': req.user.local.email,
     };
-    var update2 = {
+    var update = {
       '$push': {
-        'cartItems': cartItem
+        'orderHistory': userOrderHistory
       }
     };
 
-    cartModel2.update(query2, update2, function(err, updateCart) {
-      console.log('updateCart with new item 222: ' + updateCart);
-    });*/
+    userOrders.update(query, update, function(err, updateUserOrder) {
+      console.log('payment success: ' + updateUserOrder);
+    
+      res.json({ message: updateUserOrder });
+    });
+
+    // res.json({ message: 'lala' });
   });
 
 /*
@@ -375,10 +384,11 @@ function loadCartFromDB(req, res, next) {
 
     console.log('DB cart found');
 
+    console.log('newCart: ' + newCart);
     // req.session.total = displayCart.total = total.toFixed(2);
     req.session.total = total.toFixed(2);
 
-    console.log(newCart);
+    req.session.cart_id = retrievedCart[0]._id;
 
     req.session.cart = newCart;
 
