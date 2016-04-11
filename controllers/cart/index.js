@@ -104,6 +104,56 @@ module.exports = function (router) {
     // res.json({ message: 'lala' });
   });
 
+  router.get('/getOutstandingOrders', isLoggedIn, function(req, res) {
+    userOrders.find({ 'username': req.user.local.email }, function(err, retrievedOrders) {
+      console.log('user pending orders: ' + retrievedOrders);
+
+      var total = 0;
+
+      if (err) {
+        console.log(err);
+      }
+
+      var outstandingOrders = {};
+      var outstandingOrdersUser = retrievedOrders[0];
+      console.log('outstandingOrdersUser: ' + outstandingOrdersUser);
+
+      res.json({ message: outstandingOrdersUser });
+
+      // // Query each item data and add to cart
+      // for (var i = 0; i < retrievedCartItems.length; i++) {
+      //   /*var model =
+      //       {
+      //         name: retrievedCart[i].name,
+      //         volume: retrievedCart[i].volume,
+      //         prettyVolume: retrievedCart[i].prettyVolume,
+      //         price: retrievedCart[i].price,
+      //         prettyPrice: retrievedCart[i].prettyPrice,
+      //         qty: retrievedCart[i].qty
+      //       };*/
+
+      //   // displayCart.items.push(cartItems[i]);
+      //   total += (retrievedCartItems[i].qty * retrievedCartItems[i].price);
+
+      //   newCart[retrievedCartItems[i].item_id] = retrievedCartItems[i];
+
+      //   console.log('retrievedCartItems[' + i + ']: ' + JSON.stringify(retrievedCartItems[i], null, 1));
+      // }
+
+      // console.log('DB cart found');
+
+      // console.log('newCart: ' + newCart);
+      // // req.session.total = displayCart.total = total.toFixed(2);
+      // req.session.total = total.toFixed(2);
+
+      // req.session.cart_id = retrievedCart[0]._id;
+
+      // req.session.cart = newCart;
+
+      // return next();
+    });
+  });
+
 /*
  *  Commented by Hason Ng on 20160112:
  *  We are not storing any CC information so this is an irrelevant method of payment
