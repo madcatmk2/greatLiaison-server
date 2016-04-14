@@ -3,7 +3,8 @@
    */
 'use strict';
 
-var bignum = require('bignum');
+//var bignum = require('bignum');
+var BigDecimal = require('bigdecimal');
 
 var Product = require('../../models/productModel');
 
@@ -77,7 +78,8 @@ module.exports = function (app) {
     var volume = parseInt(req.body.volume);
 
 //     var price = parseFloat(req.body.price, 10);
-    var price = bignum(req.body.price, 10);
+//    var price = bignum(req.body.price, 10);
+      var price = bigdecimal(req.body.price, 10);
 
     //Some very lightweight input checking
     if (name === '' || isNaN(price) || isNaN(volume)) {

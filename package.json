@@ -10,6 +10,10 @@
     "all": "npm run build && npm run test"
   },
   "dependencies": {
+    "bcrypt-nodejs": "latest",
+    "bigdecimal": "^0.6.1",
+    "bignum": "^0.11.0",
+    "connect-flash": "^0.1.1",
     "construx": "^1.0.0",
     "construx-copier": "^1.0.0",
     "construx-dustjs": "^1.1.0",
@@ -18,13 +22,12 @@
     "express": "^4.12.2",
     "kraken-js": "^1.0.3",
     "makara": "^2.0.3",
-    "requirejs": "^2.1.22",
     "mongoose": "^4.3.4",
-    "bignum": "^0.11.0",
-    "passport" : "^0.3.2",
-    "passport-local" : "^1.0.0",
-    "connect-flash" : "^0.1.1",
-    "bcrypt-nodejs" : "latest"
+    "passport": "^0.3.2",
+    "passport-local": "^1.0.0",
+    "paypal-rest-sdk": "^1.6.8",
+    "requirejs": "^2.1.22",
+    "syntax-error": "^1.1.4"
   },
   "devDependencies": {
     "grunt": "^0.4.5",

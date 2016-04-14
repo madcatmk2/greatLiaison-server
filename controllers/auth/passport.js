@@ -4,6 +4,14 @@ var LocalStrategy   = require('passport-local').Strategy;
 // load up the user model
 var User            = require('../../models/user');
 
+// load up cart model
+var cartModel2 = require('../../models/cartModel2');
+var userCarts = require('mongoose').model('userCarts');
+
+var orderModel = require('../../models/orderModel');
+var userOrders = require('mongoose').model('userOrders');
+var userOrderHistories = require('mongoose').model('userOrderHistories');
+
 var passport = require('passport');
 
 // expose this function to our passport using module.exports
@@ -52,13 +60,16 @@ module.exports = function(app) {
       // we are checking to see if the user trying to login already exists
       User.findOne({ 'local.email' :  email }, function(err, user) {
         // if there are any errors, return the error
-        if (err)
+        if (err) {
           return done(err);
+        }
 
         // check to see if theres already a user with that email
         if (user) {
-          return done(null, false, req.flash('signupMessage', 'That email is already taken.'));
+          console.log('That email is already taken');
+          return done(null, false, 'That email is already taken.');
         } else {
+          console.log('That email is available');
 
           // if there is no user with that email
           // create the user
@@ -70,8 +81,30 @@ module.exports = function(app) {
 
           // save the user
           newUser.save(function(err) {
-            if (err)
+            if (err) {
               throw err;
+            }
+
+            // initialize empty cart
+            var userCart = new userCarts();
+
+            userCart.username = email;
+            userCart.cartItems = [];
+
+            userCart.save(function(err, updateCart) {
+              console.log('new user create empty cart: ' + updateCart);
+            });
+
+            // initialize empty order list
+            var userOrder = new userOrders();
+
+            userOrder.username = email;
+            userOrder.orderHistory = [];
+
+            userOrder.save(function(err, updateOrder) {
+              console.log('new user create empty order: ' + updateOrder);
+            });
+
             return done(null, newUser);
           });
         }
