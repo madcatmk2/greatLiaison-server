@@ -49,7 +49,7 @@ module.exports = function (app) {
   /**
      *  Retrieves a specific product for editing.
      */
-  app.get('/oneProduct', function (req, res) {
+  app.get('/:item_id', function (req, res) {
 
     Product.findOne({ '_id': req.param('item_id') }, function (err, prod) {
       if (err) {
@@ -108,7 +108,7 @@ module.exports = function (app) {
      * Delete a product.
      * @param: req.body.item_id Is the unique id of the product to remove.
      */
-  app.delete('/delete', function (req, res) {
+  app.delete('/one', function (req, res) {
     Product.remove({_id: req.body.item_id}, function (err) {
       if (err) {
         console.log('Remove error: ', err);

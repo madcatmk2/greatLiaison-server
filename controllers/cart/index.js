@@ -165,7 +165,7 @@ module.exports = function (router) {
   /**
     * Returns the current shopping cart
     */
-  router.get('/', isLoggedIn, loadCartFromDB, function (req, res) {
+  router.get('/', loadCartFromDB, function (req, res) {
 
     // Retrieve the shopping cart from memory
     var cart = req.session.cart,
@@ -174,89 +174,35 @@ module.exports = function (router) {
 
     console.log('session cart: ' + cart);
 
-/*     if (!cart) {
-      console.log('Session cart not found, searching DB');
-//       console.log('username: ' + req.user.local.email);
+    if (!cart) {
+      res.json({ message: 'Your cart is empty! (2a)' });
+      return;
+    }
 
-      // Try to retrieve cart from database from previous session
-      cartModel.find({ 'username': req.user.local.email }, '-_id -username -__v', function (err, retrievedCart) {
-
-        var displayCart = {items: [], total: 0},
-            total = 0;
-
-        if (err) {
-          console.log(err);
-        }
-
-        if (!retrievedCart) {
-          res.json({ message: 'Your cart is empty! (1)' });
-          return;
-        }
-
-        var newCart = {};
-
-        // Query each item data and add to cart
-        for (var i = 0; i < retrievedCart.length; i++) {
-          var model =
-              {
-                name: retrievedCart[i].cartItem.name,
-                volume: retrievedCart[i].cartItem.volume,
-                prettyVolume: retrievedCart[i].cartItem.prettyVolume,
-                price: retrievedCart[i].cartItem.price,
-                prettyPrice: retrievedCart[i].cartItem.prettyPrice,
-                qty: retrievedCart[i].cartItem.qty
-              };
-
-          displayCart.items.push(model);
-          total += (retrievedCart[i].cartItem.qty * retrievedCart[i].cartItem.price);
-
-          newCart[retrievedCart[i].cartItem.item_id] = model;
-        }
-
-        if (total == 0) {
-          res.json({ message: 'Your cart is empty! (2a)' });
-          return;
-        }
-
-        req.session.total = displayCart.total = total.toFixed(2);
-        req.session.cart = newCart;
-
-        res.json({ message: displayCart });
-        return;
-      });
-    } else { */
-//       console.log('Session cart found');
-
-      if (!cart) {
-        res.json({ message: 'Your cart is empty! (2a)' });
-        return;
-      }
-
-      // Display products in session's cart
-      for (var item in cart) {
-        if (cart[item] != null)
-        {
-          displayCart.items.push(cart[item]);
-          total += (cart[item].qty * cart[item].price);
-        }
-      }
-
-      if (total == 0)
+    // Display products in session's cart
+    for (var item in cart) {
+      if (cart[item] != null)
       {
-        res.json({ message: 'Your cart is empty! (2b)' });
-        return;
+        displayCart.items.push(cart[item]);
+        total += (cart[item].qty * cart[item].price);
       }
+    }
 
-      req.session.total = displayCart.total = total.toFixed(2);
+    if (total == 0)
+    {
+      res.json({ message: 'Your cart is empty! (2b)' });
+      return;
+    }
 
-      res.json({ message: displayCart });
-//     }
+    req.session.total = displayCart.total = total.toFixed(2);
+
+    res.json({ message: displayCart });
   });
 
   /**
     * Adds an item to the shopping cart
     */
-  router.post('/', isLoggedIn, loadCartFromDB, function (req, res) {
+  router.post('/add', loadCartFromDB, function (req, res) {
     //Load (or initialize) the cart
     req.session.cart = req.session.cart || {};
     var cart = req.session.cart;
@@ -328,7 +274,7 @@ module.exports = function (router) {
   /**
     * Deletes an item from the shopping cart
     */
-  router.delete('/deleteOne', function (req, res) {
+  router.delete('/one', function (req, res) {
     //Load (or initialize) the cart
     req.session.cart = req.session.cart || {};
     var cart = req.session.cart;
@@ -351,7 +297,8 @@ module.exports = function (router) {
         }
 
         if (cart[id].qty <= 0) {
-          cart[id] = null;
+          // cart[id] = null;
+          delete cart[id];
 
           removeFromDBCart(req, id);
         } else {
@@ -368,7 +315,7 @@ module.exports = function (router) {
   /**
     * Clears the cart entirely
     */
-  router.delete('/deleteAll', function (req, res) {
+  router.delete('/all', function (req, res) {
     //Load (or initialize) the cart
     req.session.cart = {};
 
@@ -379,6 +326,10 @@ module.exports = function (router) {
 };
 
 function loadCartFromDB(req, res, next) {
+  if (!checkUserAuthenticated(req)) {
+    return next();
+  }
+
   // Try to retrieve cart from database from previous session
   userCarts.find({ 'username': req.user.local.email }, function(err, retrievedCart) {
     console.log('new cart 222: ' + retrievedCart);
@@ -448,11 +399,8 @@ function loadCartFromDB(req, res, next) {
 
 // route middleware to make sure a user is logged in
 function isLoggedIn(req, res, next) {
-  //   isLoggedIn : function(req, res, next) {
-
   // if user is authenticated in the session, carry on
-  if (req.isAuthenticated())
-  {
+  if (checkUserAuthenticated(req)) {
     return next();
   }
 
@@ -460,7 +408,20 @@ function isLoggedIn(req, res, next) {
   res.redirect('../auth/unauth');
 }
 
+// simple function to check if user is authenticated in session
+function checkUserAuthenticated(req) {
+  if (req.isAuthenticated()) {
+    return true;
+  }
+
+  return false;
+}
+
 function updateDBCart(req, cart, prod) {
+if (!checkUserAuthenticated(req)) {
+    return;
+  }
+
   var id = req.param('item_id');
 
   /*console.log('cart: ' + JSON.stringify(cart));
@@ -641,10 +602,9 @@ function updateDBCart(req, cart, prod) {
 }
 
 function removeFromDBCart(req, id) {
-  /*var query = {
-    'username': req.user.local.email,
-    'cartItem.item_id': id
-  };*/
+  if (!checkUserAuthenticated(req)) {
+    return;
+  }
 
   var query2 = {
     'username': req.user.local.email,
@@ -676,9 +636,9 @@ function removeFromDBCart(req, id) {
 }
 
 function removeAllFromDBCart(req) {
-  /*var query = {
-    'username': req.user.local.email
-  };*/
+  if (!checkUserAuthenticated(req)) {
+    return;
+  }
 
   var query2 = {
     'username': req.user.local.email,
