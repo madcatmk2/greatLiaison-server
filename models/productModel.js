@@ -7,7 +7,8 @@ var productModel = function () {
     sku: String,
     name: String,
     englishName: String,
-    category: String,
+    categoryName: String,
+    categoryId: String,
     description: String,
     instructions: String,
     size: String,
@@ -16,6 +17,10 @@ var productModel = function () {
     salePrice: String,
     priceCurrency: String
   });
+
+  productSchema.methods.prettyPrint = function() {
+    return this.sku + ': ' + this.name + ': ' + this.categoryName;
+  };
 
   return mongoose.model('Product', productSchema);
 };
