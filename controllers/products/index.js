@@ -53,6 +53,7 @@ module.exports = function(app) {
         if (products.length > 0) {
           res.json({
             success: true,
+            categoryName: products[0].categoryName,
             products: products
           });
         } else {
