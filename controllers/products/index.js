@@ -4,6 +4,63 @@ var _ = require('underscore');
 var Product = require('../../models/productModel');
 
 module.exports = function(app) {
+  /**
+   * @api {get} /products/categories Get all product categories
+   * @apiGroup products
+   *
+   * @apiSuccess {Object} categories List of categories.
+   */
+  app.get('/categories', function(req, res) {
+    Product.categories(function(err, categories) {
+      if (err) {
+        console.log("GET /products/categories error: " + err);
+        return res.status(500).send('Error: ' + err.message);
+      }
+
+      if (categories) {
+        var fixedCategories = _.map(categories, function(category) {
+          return {
+            categoryId: category._id.categoryId,
+            categoryName: category._id.categoryName
+          };
+        });
+
+        res.json({
+          success: true,
+          categories: fixedCategories
+        });
+      } else {
+        res.status(404).send('Categories not found');
+      }
+    });
+  });
+
+  /**
+   * @api {get} /products/category/:categoryId Get products from a category
+   * @apiGroup products
+   *
+   * @apiSuccess {Object} products List of products.
+   */
+  app.get('/categories/:categoryId', function(req, res) {
+    Product
+      .where('categoryId', req.param('categoryId'))
+      .exec(function(err, products) {
+        if (err) {
+          console.log("GET /products/categories/:categoryId error: " + err);
+          return res.status(500).send('Error: ' + err.message);
+        }
+
+        if (products.length > 0) {
+          res.json({
+            success: true,
+            products: products
+          });
+        } else {
+          res.status(404).send('Products not found for category '
+            + req.param('categoryId'));
+        }
+      });
+  });
 
   /**
    * @api {get} /products Get products
@@ -12,11 +69,11 @@ module.exports = function(app) {
    * @apiDescription Retrieves a list of all the G&L products.
    * @apiSuccess {Object} products List of products.
    */
-  app.get('/', function (req, res) {
-    Product.find(function (err, products) {
+  app.get('/', function(req, res) {
+    Product.find(function(err, products) {
       if (err) {
         console.log("GET /products error: " + err);
-        return res.status(500).send('Server error');
+        return res.status(500).send('Error: ' + err.message);
       }
 
       res.json({
@@ -35,13 +92,13 @@ module.exports = function(app) {
    * @apiDescription Retrieves details about one product
    * @apiSuccess {Object} product Product details.
    */
-  app.get('/:productId', function (req, res) {
+  app.get('/:productId', function(req, res) {
     Product.findOne(
       { '_id': req.param('productId') },
-      function (err, product) {
+      function(err, product) {
         if (err) {
           console.log("GET /products/:productId error: " + err);
-          return res.status(500).send('Server error');
+          return res.status(500).send('Error: ' + err.message);
         }
 
         if (product) {
@@ -75,7 +132,7 @@ module.exports = function(app) {
    * @apiDescription Adds a new product to the collection.
    * @apiSuccess {Object} product Returns the created product.
    */
-  app.post('/', function (req, res) {
+  app.post('/', function(req, res) {
     var product = {
       sku: req.body.sku,
       name: req.body.name,
@@ -107,7 +164,7 @@ module.exports = function(app) {
     newProduct.save(function(err, savedProduct) {
       if(err) {
         console.log("POST /products/ error: " + err);
-        return res.status(500).send('Server error');
+        return res.status(500).send('Error: ' + err.message);
       }
 
       res.json({
@@ -126,11 +183,11 @@ module.exports = function(app) {
    * @apiDescription Deletes a product.
    * @apiSuccess {Object} product Product details.
    */
-  app.delete('/:productId', function (req, res) {
-    Product.remove({_id: req.param('productId')}, function (err, response) {
+  app.delete('/:productId', function(req, res) {
+    Product.remove({_id: req.param('productId')}, function(err, response) {
       if(err) {
         console.log("DELETE /products/ error: " + err);
-        return res.status(500).send('Server error');
+        return res.status(500).send('Error: ' + err.message);
       }
 
       res.json({
@@ -139,9 +196,4 @@ module.exports = function(app) {
       });
     });
   });
-
-  // TODO
-  //
-  // GET /products/categories => list of categoryIDs and names
-  // GET /products/categories/:category_id
 };

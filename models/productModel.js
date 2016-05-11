@@ -22,6 +22,17 @@ var productModel = function () {
     return this.sku + ': ' + this.name + ': ' + this.categoryName;
   };
 
+  productSchema.statics.categories = function(cb) {
+    return this.aggregate([{
+      "$group": {
+        "_id": {
+          categoryName: "$categoryName",
+          categoryId: "$categoryId"
+        }
+      }
+    }]).exec(cb);
+  };
+
   return mongoose.model('Product', productSchema);
 };
 
