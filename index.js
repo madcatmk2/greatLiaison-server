@@ -23,7 +23,7 @@ options = {
 
 app = module.exports = express();
 
-app.use(kraken(options));
+app.use('/api', kraken(options));
 
 //app.use(passport.initialize());
 //app.use(passport.session()); // persistent login sessions
