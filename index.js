@@ -29,14 +29,6 @@ app.use('/api', kraken(options));
 //app.use(passport.session()); // persistent login sessions
 // app.use(flash()); // use connect-flash for flash messages stored in session
 
-/* app.use(function(req, res, next) {
-  if (isIPAllowed(req.ip)) {
-    next();
-  } else {
-    res.send(403, 'forbidden');
-  }
-}); */
-
 app.use(function(req, res, next) {
     // Set permissive CORS header - this allows this server to be used only as
     // an API server
