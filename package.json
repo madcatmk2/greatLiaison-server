@@ -1,12 +1,17 @@
 {
   "name": "greatliaison",
   "version": "0.1.0",
-  "description": "Online store!",
+  "description": "Great Liaison online store",
   "author": "Hason ng",
   "main": "index.js",
+  "apidoc": {
+    "title": "Great Liaison",
+    "url": "localhost:8080/api"
+  },
   "scripts": {
     "test": "grunt test",
     "build": "grunt build",
+    "start": "npm run build && nodemon server.js",
     "all": "npm run build && npm run test"
   },
   "dependencies": {
@@ -34,17 +39,20 @@
   },
   "devDependencies": {
     "grunt": "^0.4.5",
+    "grunt-apidoc": "^0.11.0",
     "grunt-cli": "^0.1.13",
     "grunt-config-dir": "^0.3.2",
     "grunt-contrib-clean": "^0.6.0",
     "grunt-contrib-jshint": "^0.10.0",
     "grunt-contrib-less": "^1.1.0",
     "grunt-contrib-requirejs": "^0.4.4",
+    "grunt-copy-browser-modules": "^5.0.1",
     "grunt-copy-to": "0.0.10",
     "grunt-dustjs": "^1.2.1",
     "grunt-makara-amdify": "^1.0.1",
     "grunt-mocha-cli": "^1.14.0",
     "mocha": "^1.18.0",
+    "nodemon": "^1.9.2",
     "supertest": "^0.9.0"
   }
 }

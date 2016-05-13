@@ -31,3 +31,11 @@ Setup instructions:
 
 8) Run the server in the root directory with the command:
   - node server.js
+
+------
+
+# Apidocs
+In order to view updated API documentation at /apidoc, build the entire application via `grunt build`.
+
+Alternatively, you can run `npm start` which invokes `grunt build` and `nodemon server.js` in parallel.
+
