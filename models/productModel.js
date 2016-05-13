@@ -24,10 +24,10 @@ var productModel = function () {
 
   productSchema.statics.categories = function(cb) {
     return this.aggregate([{
-      "$group": {
-        "_id": {
-          categoryName: "$categoryName",
-          categoryId: "$categoryId"
+      '$group': {
+        '_id': {
+          categoryName: '$categoryName',
+          categoryId: '$categoryId'
         }
       }
     }]).exec(cb);

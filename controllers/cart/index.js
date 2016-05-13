@@ -4,7 +4,7 @@ var _ = require('underscore');
 
 module.exports = function(app) {
   /**
-   * @api {get} /cart Returns the current shopping cart
+   * @api {get} /cart Get cart
    * @apiGroup cart
    *
    * @apiSuccess {Object} cart Shopping cart
@@ -37,9 +37,8 @@ module.exports = function(app) {
       }
     });
     if (missingKeys.length > 0) {
-      var errorText = 'Params missing: ' + missingKeys;
-      console.log('POST /cart - ' + errorText);
-      return res.status(400).send(errorText);
+      console.log('POST /cart - Params missing: ' + missingKeys);
+      return res.status(400).send('Params missing: ' + missingKeys);
     }
 
     var cart = req.session.cart = req.session.cart || {};
@@ -55,7 +54,7 @@ module.exports = function(app) {
   });
 
   /**
-   * @api {put} /cart/:productId Updates an item in the cart
+   * @api {put} /cart/:productId Update item in cart
    * @apiGroup cart
    *
    * @apiParam {String} quantity Quantity to update to.
@@ -67,15 +66,13 @@ module.exports = function(app) {
     var quantity = req.body.quantity;
 
     if (!item) {
-      var errorText = 'Product not found.';
-      console.log('PUT /cart/:productId - ' + errorText);
-      return res.status(404).send(errorText);
-    };
+      console.log('PUT /cart/:productId - Product not found.');
+      return res.status(404).send('Product not found.');
+    }
 
     if (!quantity) {
-      var errorText = 'Missing quantity to update.';
-      console.log('PUT /cart/:productId - ' + errorText);
-      return res.status(400).send(errorText);
+      console.log('PUT /cart/:productId - Missing quantity to update.');
+      return res.status(400).send('Missing quantity to update.');
     }
 
     item.quantity = quantity;
@@ -83,7 +80,7 @@ module.exports = function(app) {
   });
 
   /**
-   * @api {delete} /cart Clears the shopping cart
+   * @api {delete} /cart Remove all from cart
    * @apiGroup cart
    *
    * @apiSuccess {Object} cart Updated shopping cart
@@ -94,7 +91,7 @@ module.exports = function(app) {
   });
 
   /**
-   * @api {delete} /cart/:productId Removes an item from the cart
+   * @api {delete} /cart/:productId Remove item from cart
    * @apiGroup cart
    *
    * @apiSuccess {Object} cart Updated shopping cart
@@ -102,10 +99,9 @@ module.exports = function(app) {
   app.delete('/:productId', checkCartEmpty, function(req, res) {
     var item = req.session.cart[req.params.productId];
     if (!item) {
-      var errorText = 'Product not found.';
-      console.log('DELETE /cart/:productId - ' + errorText);
-      return res.status(404).send(errorText);
-    };
+      console.log('DELETE /cart/:productId - Product not found.');
+      return res.status(404).send('Product not found.');
+    }
 
     delete req.session.cart[req.params.productId];
 

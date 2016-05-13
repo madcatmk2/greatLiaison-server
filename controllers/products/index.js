@@ -13,7 +13,7 @@ module.exports = function(app) {
   app.get('/categories', function(req, res) {
     Product.categories(function(err, categories) {
       if (err) {
-        console.log("GET /products/categories error: " + err);
+        console.log('GET /products/categories error: ' + err);
         return res.status(500).send('Error: ' + err.message);
       }
 
@@ -46,7 +46,7 @@ module.exports = function(app) {
       .where('categoryId', req.params.categoryId)
       .exec(function(err, products) {
         if (err) {
-          console.log("GET /products/categories/:categoryId error: " + err);
+          console.log('GET /products/categories/:categoryId error: ' + err);
           return res.status(500).send('Error: ' + err.message);
         }
 
@@ -57,8 +57,8 @@ module.exports = function(app) {
             products: products
           });
         } else {
-          res.status(404).send('Products not found for category '
-            + req.params.categoryId);
+          res.status(404).send('Products not found for category ' +
+            req.params.categoryId);
         }
       });
   });
@@ -73,7 +73,7 @@ module.exports = function(app) {
   app.get('/', function(req, res) {
     Product.find(function(err, products) {
       if (err) {
-        console.log("GET /products error: " + err);
+        console.log('GET /products error: ' + err);
         return res.status(500).send('Error: ' + err.message);
       }
 
@@ -98,7 +98,7 @@ module.exports = function(app) {
       { '_id': req.params.productId },
       function(err, product) {
         if (err) {
-          console.log("GET /products/:productId error: " + err);
+          console.log('GET /products/:productId error: ' + err);
           return res.status(500).send('Error: ' + err.message);
         }
 
@@ -164,7 +164,7 @@ module.exports = function(app) {
     var newProduct = new Product(product);
     newProduct.save(function(err, savedProduct) {
       if(err) {
-        console.log("POST /products/ error: " + err);
+        console.log('POST /products/ error: ' + err);
         return res.status(500).send('Error: ' + err.message);
       }
 
@@ -184,7 +184,7 @@ module.exports = function(app) {
   app.delete('/:productId', function(req, res) {
     Product.remove({_id: req.params.productId }, function(err, response) {
       if(err) {
-        console.log("DELETE /products/ error: " + err);
+        console.log('DELETE /products/ error: ' + err);
         return res.status(500).send('Error: ' + err.message);
       }
 
