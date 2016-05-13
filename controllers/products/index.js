@@ -13,7 +13,7 @@ module.exports = function(app) {
   app.get('/categories', function(req, res) {
     Product.categories(function(err, categories) {
       if (err) {
-        console.log("GET /products/categories error: " + err);
+        console.log('GET /products/categories error: ' + err);
         return res.status(500).send('Error: ' + err.message);
       }
 
@@ -43,10 +43,10 @@ module.exports = function(app) {
    */
   app.get('/categories/:categoryId', function(req, res) {
     Product
-      .where('categoryId', req.param('categoryId'))
+      .where('categoryId', req.params.categoryId)
       .exec(function(err, products) {
         if (err) {
-          console.log("GET /products/categories/:categoryId error: " + err);
+          console.log('GET /products/categories/:categoryId error: ' + err);
           return res.status(500).send('Error: ' + err.message);
         }
 
@@ -57,8 +57,8 @@ module.exports = function(app) {
             products: products
           });
         } else {
-          res.status(404).send('Products not found for category '
-            + req.param('categoryId'));
+          res.status(404).send('Products not found for category ' +
+            req.params.categoryId);
         }
       });
   });
@@ -73,7 +73,7 @@ module.exports = function(app) {
   app.get('/', function(req, res) {
     Product.find(function(err, products) {
       if (err) {
-        console.log("GET /products error: " + err);
+        console.log('GET /products error: ' + err);
         return res.status(500).send('Error: ' + err.message);
       }
 
@@ -95,10 +95,10 @@ module.exports = function(app) {
    */
   app.get('/:productId', function(req, res) {
     Product.findOne(
-      { '_id': req.param('productId') },
+      { '_id': req.params.productId },
       function(err, product) {
         if (err) {
-          console.log("GET /products/:productId error: " + err);
+          console.log('GET /products/:productId error: ' + err);
           return res.status(500).send('Error: ' + err.message);
         }
 
@@ -114,7 +114,7 @@ module.exports = function(app) {
   });
 
   /**
-   * @api {post} /products/ Add product
+   * @api {post} /products Add product
    * @apiGroup products
    *
    * @apiParam {String} sku  Product SKU.
@@ -164,14 +164,11 @@ module.exports = function(app) {
     var newProduct = new Product(product);
     newProduct.save(function(err, savedProduct) {
       if(err) {
-        console.log("POST /products/ error: " + err);
+        console.log('POST /products/ error: ' + err);
         return res.status(500).send('Error: ' + err.message);
       }
 
-      res.json({
-        success: true,
-        product: savedProduct
-      });
+      res.redirect('/api/products');
     });
   });
 
@@ -185,9 +182,9 @@ module.exports = function(app) {
    * @apiSuccess {Object} product Product details.
    */
   app.delete('/:productId', function(req, res) {
-    Product.remove({_id: req.param('productId')}, function(err, response) {
+    Product.remove({_id: req.params.productId }, function(err, response) {
       if(err) {
-        console.log("DELETE /products/ error: " + err);
+        console.log('DELETE /products/ error: ' + err);
         return res.status(500).send('Error: ' + err.message);
       }
 
