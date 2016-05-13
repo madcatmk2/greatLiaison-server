@@ -5,8 +5,8 @@ var LocalStrategy   = require('passport-local').Strategy;
 var User            = require('../../models/user');
 
 // load up cart model
-var cartModel2 = require('../../models/cartModel2');
-var userCarts = require('mongoose').model('userCarts');
+// var cartModel2 = require('../../models/cartModel2');
+// var userCarts = require('mongoose').model('userCarts');
 
 var orderModel = require('../../models/orderModel');
 var userOrders = require('mongoose').model('userOrders');
@@ -86,14 +86,14 @@ module.exports = function(app) {
             }
 
             // initialize empty cart
-            var userCart = new userCarts();
+            // var userCart = new userCarts();
 
-            userCart.username = email;
-            userCart.cartItems = [];
+            // userCart.username = email;
+            // userCart.cartItems = [];
 
-            userCart.save(function(err, updateCart) {
-              console.log('new user create empty cart: ' + updateCart);
-            });
+            // userCart.save(function(err, updateCart) {
+            //   console.log('new user create empty cart: ' + updateCart);
+            // });
 
             // initialize empty order list
             var userOrder = new userOrders();
