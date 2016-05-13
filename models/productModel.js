@@ -3,35 +3,37 @@
 var mongoose = require('mongoose');
 
 var productModel = function () {
-
-  //Define a super simple schema for our products.
   var productSchema = mongoose.Schema({
+    sku: String,
     name: String,
-    volume: Number,
-    price: Number,
-    stock: Number
+    englishName: String,
+    categoryName: String,
+    categoryId: String,
+    description: String,
+    instructions: String,
+    size: String,
+    origin: String,
+    fullPrice: String,
+    salePrice: String,
+    priceCurrency: String
   });
 
-  //Verbose toString method
-  productSchema.methods.whatAmI = function () {
-    var greeting = this.name ?
-        'Hello, I\'m a ' + this.name + ' with volume of ' + this.volume + 'mL. I\'m worth $' + this.price
-    : 'I don\'t have a name :(';
-    console.log(greeting);
+  productSchema.methods.prettyPrint = function() {
+    return this.sku + ': ' + this.name + ': ' + this.categoryName;
   };
 
-  //Format the volume of the product to show unit of measurement
-  productSchema.methods.prettyVolume = function () {
-    return this.volume + ' mL';
-  };
-
-  //Format the price of the product to show a dollar sign, and two decimal places
-  productSchema.methods.prettyPrice = function () {
-    return '$' + this.price.toFixed(2);
+  productSchema.statics.categories = function(cb) {
+    return this.aggregate([{
+      '$group': {
+        '_id': {
+          categoryName: '$categoryName',
+          categoryId: '$categoryId'
+        }
+      }
+    }]).exec(cb);
   };
 
   return mongoose.model('Product', productSchema);
-
 };
 
 module.exports = new productModel();

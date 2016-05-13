@@ -29,7 +29,7 @@ var orderHistoryUserModelSchema = mongoose.Schema({
 var orderModelSchema = mongoose.Schema({
 	username	: String,
 	orderHistory: [orderHistoryUserModelSchema]
-})
+});
 
 // module.exports = mongoose.model('orderItems', orderItemModelSchema);
 module.exports = mongoose.model('userOrderHistories', orderHistoryUserModelSchema);

@@ -79,9 +79,10 @@
 
     "session": {
       "module": {
-        // NB: arrays like 'arguments' are not merged but rather replaced, so you must
-        //     include all required configuration options here.
+        // use custom redis session module
+        "name": "path:./lib/middleware/redis-session",
         "arguments": [
+          // express-session configuration
           {
             "secret": "ilovescotchscotchyscotchscotch",
             "cookie": {
@@ -91,7 +92,13 @@
             },
             "resave": true,
             "saveUninitialized": true,
-            "proxy": null
+            "store": null    // NB: this will be overlaid in our module
+          },
+          // connect-redis configuration
+          {
+            "host": "localhost",
+            "port": 6379,
+            "prefix": "session:"
           }
         ]
       }
@@ -110,7 +117,6 @@
         ]
       }
     },
-
 
     "static": {
       "module": {

@@ -3,6 +3,7 @@
 var express  = require('express');
 var kraken   = require('kraken-js');
 var db       = require('./lib/database');
+var path     = require('path');
 
 //var passport = require('passport');
 //var flash    = require('connect-flash');
@@ -23,23 +24,24 @@ options = {
 
 app = module.exports = express();
 
-app.use(kraken(options));
+app.use('/api', kraken(options));
+app.use('/apidoc', express.static(__dirname + '/apidoc'));
 
 //app.use(passport.initialize());
 //app.use(passport.session()); // persistent login sessions
 // app.use(flash()); // use connect-flash for flash messages stored in session
 
-/* app.use(function(req, res, next) {
-  if (isIPAllowed(req.ip)) {
-    next();
-  } else {
-    res.send(403, 'forbidden');
-  }
-}); */
+app.use(function(req, res, next) {
+  // Set permissive CORS header - this allows this server to be used only as
+  // an API server
+  res.setHeader('Access-Control-Allow-Origin', '*');
+
+  next();
+});
 
 app.on('start', function () {
-    console.log('Application ready to serve requests.');
-    console.log('Environment: %s', app.kraken.get('env:env'));
+  console.log('Application ready to serve requests.');
+  console.log('Environment: %s', app.kraken.get('env:env'));
 });
 
 // route middleware to only allow connections from certain IP's
