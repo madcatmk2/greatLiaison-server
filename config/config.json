@@ -48,6 +48,14 @@
       }
     },
 
+    "cors": {
+      "enabled": true,
+      "priority": 110,
+      "module": {
+        "name": "path:./lib/middleware/cors"
+      }
+    },
+
     "session": {
       "module": {
         // use custom redis session module
