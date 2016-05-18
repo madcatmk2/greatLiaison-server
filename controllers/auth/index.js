@@ -1,5 +1,10 @@
 'use strict';
 
+/*
+ * NOTE: This is currently an unused module. Needs to integrate with both the
+ * backend and frontend.
+ */
+
 var passport        = require('passport');
 // var flash           = require('connect-flash');
 

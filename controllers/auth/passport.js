@@ -1,5 +1,10 @@
 'use strict';
 
+/*
+ * NOTE: This is currently an unused module. Needs to integrate with both the
+ * backend and frontend.
+ */
+
 // load all the things we need
 var LocalStrategy   = require('passport-local').Strategy;
 
