@@ -26,7 +26,7 @@ module.exports = function(app) {
   app.post('/', function(req, res) {
     var item = {
       productId: req.body.productId,
-      quantity: req.body.quantity
+      quantity: parseInt(req.body.quantity)
     };
 
     // Input checking
