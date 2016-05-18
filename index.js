@@ -34,7 +34,17 @@ app.use('/apidoc', express.static(__dirname + '/apidoc'));
 app.use(function(req, res, next) {
   // Set permissive CORS header - this allows this server to be used only as
   // an API server
-  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:8090');
+  var domain, port;
+  if (process.env.NODE_ENV === 'production') {
+    domain = '108.218.104.23';
+    port = '8092';
+  } else {
+    domain = 'localhost';
+    port = '8090';
+  }
+  var host = 'http://' + domain + ':' + port;
+
+  res.setHeader('Access-Control-Allow-Origin', host);
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE');
 
