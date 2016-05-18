@@ -87,7 +87,7 @@
             "secret": "ilovescotchscotchyscotchscotch",
             "cookie": {
               "path": "/",
-              "httpOnly": true,
+              "httpOnly": false,
               "maxAge": null
             },
             "resave": true,

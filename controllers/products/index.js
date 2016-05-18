@@ -3,6 +3,10 @@
 var _ = require('underscore');
 var Product = require('../../models/productModel');
 
+function arrayToObject(array, idString) {
+  return _.object(_.pluck(array, idString), array);
+}
+
 module.exports = function(app) {
   /**
    * @api {get} /products/categories Get all product categories
@@ -18,6 +22,7 @@ module.exports = function(app) {
       }
 
       if (categories) {
+        console.log(categories);
         var fixedCategories = _.map(categories, function(category) {
           return {
             categoryId: category._id.categoryId,
@@ -27,7 +32,7 @@ module.exports = function(app) {
 
         res.json({
           success: true,
-          categories: fixedCategories
+          categories: arrayToObject(fixedCategories, 'categoryId')
         });
       } else {
         res.status(404).send('Categories not found');
@@ -54,7 +59,7 @@ module.exports = function(app) {
           res.json({
             success: true,
             categoryName: products[0].categoryName,
-            products: products
+            products: arrayToObject(products, '_id')
           });
         } else {
           res.status(404).send('Products not found for category ' +
@@ -79,7 +84,7 @@ module.exports = function(app) {
 
       res.json({
         success: true,
-        products: products
+        products: arrayToObject(products, '_id')
       });
     });
   });
