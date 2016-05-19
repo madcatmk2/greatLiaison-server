@@ -1,38 +1,37 @@
-'use strict';
+// 'use strict';
 
-var mongoose = require('mongoose');
-mongoose.set('debug', true);
+// var mongoose = require('mongoose');
 
-// var orderItemModelSchema = mongoose.Schema({
-//   item_id     : String,
-//   name        : String,
-//   volume      : Number,
-//   prettyVolume: String,
-//   price       : Number,
-//   prettyPrice : String,
-//   qty         : Number
-// });
+// var orderModel = function() {
+//   var orderSchema = mongoose.Schema({
+//     orderNumber: Number,
+//     date: { type: Date, default: Date.now },
+//     status: String,
+//     // items: [orderItemSchema],
+//     shippingInfo: {
+//       firstName: String,
+//       lastName: String,
+//       phoneNumber: String,
+//       emailAddress: String,
+//       address1: String,
+//       address2: String
+//     },
+//     subTotal: Number,
+//     referrer: String,
+//     paypalTransactionId: String // Just guessing here
+//   });
 
-var orderHistoryUserModelSchema = mongoose.Schema({
-  // username      : String,
-  // orderItems    : [orderItemModelSchema],
-  // orderStatus	: String,
-  // orderTotal	: Number,
-  // orderDate		: Date
-  orderCartId : String,
-  orderStatus : String,
-  orderTotal  : Number,
-  orderNumber : String,
-  orderDate   : Date
-});
+//   var orderItemSchema = mongoose.Schema({
+//     productId: String,
+//     productName: String,
+//     sku: String,
+//     price: Number,
+//     quantity: Number
+//   });
 
-var orderModelSchema = mongoose.Schema({
-	username	: String,
-	orderHistory: [orderHistoryUserModelSchema]
-});
+//   // Static and instance methods TBD
 
-// module.exports = mongoose.model('orderItems', orderItemModelSchema);
-module.exports = mongoose.model('userOrderHistories', orderHistoryUserModelSchema);
-module.exports = mongoose.model('userOrders', orderModelSchema);
-/* var orderItem = mongoose.model('orderItems', orderItemModelSchema);
-var userCart = mongoose.model('userCarts', orderHistoryModelSchema);*/
+//   return mongoose.model('Order', orderSchema);
+// };
+
+// module.exports = new orderModel();
