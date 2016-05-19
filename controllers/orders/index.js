@@ -12,19 +12,6 @@
  * of these endpoints presumes that customers don't need to login/authenticate
  * in order to purchase. We'll add auth and user account info later.
  *
- * Each ORDER contains:
- * - Id
- * - Datetime of order
- * - Status (active / fulfilled / cancelled)
- * - List of items purchased (return full product information for each item)
- * - Customer information
- *    - Name
- *    - Shipping Address
- *    - Phone
- *    - Email
- * - Referrer (Full name of referrer)
- * - Payment information
- *    - Paypal Details? (Don't know the specifics that need to be saved)
  */
 
 module.exports = function(app) {

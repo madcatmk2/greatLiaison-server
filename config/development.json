@@ -6,7 +6,6 @@
     "views": "path:./public/templates"
   },
 
-
   "view engines": {
     "dust": {
       "module": "makara",
@@ -22,8 +21,6 @@
       }
     }
   },
-
-
 
   "middleware": {
 
@@ -42,7 +39,6 @@
               "files": "/templates/**/*.js",
               "base": "templates"
             },
-
 
             "css": {
               "module": "construx-less",
