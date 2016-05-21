@@ -2,8 +2,6 @@
 
 var app = require('./index');
 var http = require('http');
-
-
 var server;
 
 /*
