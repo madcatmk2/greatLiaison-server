@@ -12,9 +12,6 @@
     "fallback": "en-US"
   },
 
-  "specialization": {
-  },
-
   "middleware": {
     /**
       * Override the default lusca configuration to disable CSRF handling.
@@ -33,13 +30,12 @@
 
     /**
       * Enable *ONLY* CSRF filtered by route.
-      * Note: The route "regex" needs the double parens
-      * because of how express parses route strings.
+      * Note: The route "regex" needs the double parens because of how express
+      * parses route strings.
       */
     "csrf": {
       "enabled": true,
       "priority": 111,
-      //"route": "/((?!cart))*",
       "route": "/((?!))*",
       "module": {
         "name": "lusca",
@@ -48,6 +44,10 @@
       }
     },
 
+    /**
+     * Cross-Origin Resource Sharing: Needs to be enabled for the G&L
+     * frontend (on a different port) to communicate with the server.
+     */
     "cors": {
       "enabled": true,
       "priority": 110,
@@ -56,9 +56,12 @@
       }
     },
 
+    /**
+     * Session Store: Use custom Redis session module which scales better in
+     * a production environment.
+     */
     "session": {
       "module": {
-        // use custom redis session module
         "name": "path:./lib/middleware/redis-session",
         "arguments": [
           // express-session configuration
@@ -71,7 +74,7 @@
             },
             "resave": true,
             "saveUninitialized": true,
-            "store": null    // NB: this will be overlaid in our module
+            "store": null
           },
           // connect-redis configuration
           {
@@ -94,12 +97,6 @@
             "specialization": "config:specialization"
           }
         ]
-      }
-    },
-
-    "static": {
-      "module": {
-        "arguments": [ "path:./.build" ]
       }
     },
 

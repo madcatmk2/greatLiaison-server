@@ -33,7 +33,4 @@ node_modules*
 # API documentation
 apidoc
 
-# KrakenJS build artifacts
-.build
-
 .DS_Store

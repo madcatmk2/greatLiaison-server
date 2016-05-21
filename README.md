@@ -1,41 +1,25 @@
-e-commerce solution for Great Liaison
+# Great Liaison Online Store API Server
 
-Setup instructions:
+Great Liaison Limited sells health-care and skin-care products through their online shopping portal. This server houses all the product information for the website, and powers the shopping experience.
 
-1) Download and install node.js
-  - Developed on version 4.2.4
+This server is developed in Node.js and constructed with help from the [KrakenJS framework](https://github.com/krakenjs/kraken-js). Most notably, it also uses the Paypal SDK to power transactions.
 
-2) Download and install MongoDB
-  - DB version 2.6.10
+## Setup instructions
+<em>see package.json for specific versions this app is built on</em>
 
-3) Download and install Redis (> v3.0.7)
-  - needed for session store
+1. Download and install Node.js (Developed on version 4.2.4)
+2. Download and install MongoDB (DB version 3.2)
+3. Download and install Redis (v3.0.7 or newer)
+4. Download and install the latest [npm package installer](https://www.npmjs.com)
+5. Setup a MongoDB database with the following: (note case IS sensitive)
 
-4) Download and install the latest npm package installer
-  - https://www.npmjs.com
+* Database name: greatliaison
+* Login user: greatliaison
+* Password: abc123
 
-5a) Setup a MongoDB database with the following: (note case IS sensitive)
-  - Database name: greatliaison
-  - Login user: greatliaison
-  - Password: abc123
+6. Test the database login to ensure it authenticates
+    mongo -u greatliaison -p abc123 --authenticationDatabase greatliaison
 
-  - Should you want to change the password, please be reminded to update the login authentication in the source files of the project
-
-5b) Test the database login to ensure it authenticates
-  - mongo -u greatliaison -p abc123 --authenticationDatabase greatliaison
-
-6) Navigate to the root of the project folder (greatLiaison/) and run npm install.  Run as sudo if prompted as necessary
-  - This step downloads the node dependencies required in this project
-
-(optional) 7) If user password is different from above, remember to update the file (greatLiaison/config/config.json) and change the DB user password field
-
-8) Run the server in the root directory with the command:
-  - node server.js
-
-------
-
-# Apidocs
-In order to view updated API documentation at /apidoc, build the entire application via `grunt build`.
-
-Alternatively, you can run `npm start` which invokes `grunt build` and `nodemon server.js` in parallel.
-
+7. Navigate to the root of the project folder and run `npm install`. Run as sudo if prompted as necessary
+8. Build API documentation and other tasks with `npm run build`.
+9. Run the server in the root directory with `node server.js`, or use the npm script `npm run prod-start` if running on production.

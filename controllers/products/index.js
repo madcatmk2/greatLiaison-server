@@ -3,10 +3,6 @@
 var _ = require('underscore');
 var Product = require('../../models/productModel');
 
-function arrayToObject(array, idString) {
-  return _.object(_.pluck(array, idString), array);
-}
-
 module.exports = function(app) {
   /**
    * @api {get} /products/categories Get all product categories
@@ -199,4 +195,12 @@ module.exports = function(app) {
       });
     });
   });
+
+  /*
+   * Helper methods
+   */
+  function arrayToObject(array, idString) {
+    return _.object(_.pluck(array, idString), array);
+  }
+
 };
