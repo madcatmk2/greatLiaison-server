@@ -11,7 +11,7 @@
   "scripts": {
     "test": "grunt test",
     "build": "grunt build",
-    "start": "npm run build && nodemon server.js",
+    "start": "npm run build && NODE_ENV=development nodemon server.js",
     "prod-start": "npm run build && NODE_ENV=production nodemon server.js",
     "all": "npm run build && npm run test"
   },

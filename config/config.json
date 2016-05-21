@@ -7,9 +7,15 @@
     "database": "greatliaison"
   },
 
-  "i18n": {
-    "contentPath": "path:./locales",
-    "fallback": "en-US"
+  "addresses": {
+    "frontend": {
+      "host": "http://108.218.104.23",
+      "port": "8090"
+    },
+    "backend": {
+      "host": "http://108.218.104.23",
+      "port": "8080"
+    }
   },
 
   "middleware": {

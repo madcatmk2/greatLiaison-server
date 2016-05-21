@@ -22,4 +22,4 @@ This server is developed in Node.js and constructed with help from the [KrakenJS
 
 7. Navigate to the root of the project folder and run `npm install`. Run as sudo if prompted as necessary
 8. Build API documentation and other tasks with `npm run build`.
-9. Run the server in the root directory with `node server.js`, or use the npm script `npm run prod-start` if running on production.
+9. Run the server in the root directory with `NODE_ENV=development node server.js`. Alternatively, you can use the npm scripts `npm start` (development) or `npm run prod-start` (production).

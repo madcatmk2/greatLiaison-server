@@ -1,0 +1,12 @@
+{
+  "addresses": {
+    "frontend": {
+      "host": "http://localhost",
+      "port": "8090"
+    },
+    "backend": {
+      "host": "http://localhost",
+      "port": "8080"
+    }
+  }
+}
