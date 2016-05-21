@@ -92,20 +92,6 @@
       }
     },
 
-    "makara": {
-      "priority": 100,
-      "enabled": true,
-      "module": {
-        "name": "makara",
-        "arguments": [
-          {
-            "i18n": "config:i18n",
-            "specialization": "config:specialization"
-          }
-        ]
-      }
-    },
-
     "router": {
       "module": {
         "arguments": [{ "directory": "path:./controllers" }]
