@@ -10,15 +10,13 @@ module.exports = function(app) {
    *
    * @apiSuccess {Object} categories List of categories.
    */
-  app.get('/categories', function(req, res) {
+  app.get('/categories', function(req, res, next) {
     Product.categories(function(err, categories) {
       if (err) {
-        console.log('GET /products/categories error: ' + err);
-        return res.status(500).send('Error: ' + err.message);
+        return next(err);
       }
 
       if (categories) {
-        console.log(categories);
         var fixedCategories = _.map(categories, function(category) {
           return {
             categoryId: category._id.categoryId,
@@ -31,7 +29,7 @@ module.exports = function(app) {
           categories: arrayToObject(fixedCategories, 'categoryId')
         });
       } else {
-        res.status(404).send('Categories not found');
+        res.status(404).send({error: 'Categories not found'});
       }
     });
   });
@@ -42,13 +40,12 @@ module.exports = function(app) {
    *
    * @apiSuccess {Object} products List of products.
    */
-  app.get('/categories/:categoryId', function(req, res) {
+  app.get('/categories/:categoryId', function(req, res, next) {
     Product
       .where('categoryId', req.params.categoryId)
       .exec(function(err, products) {
         if (err) {
-          console.log('GET /products/categories/:categoryId error: ' + err);
-          return res.status(500).send('Error: ' + err.message);
+          return next(err);
         }
 
         if (products.length > 0) {
@@ -58,8 +55,9 @@ module.exports = function(app) {
             products: arrayToObject(products, '_id')
           });
         } else {
-          res.status(404).send('Products not found for category ' +
-            req.params.categoryId);
+          res.status(404).send({
+            error: 'Products not found for category ' + req.params.categoryId
+          });
         }
       });
   });
@@ -71,11 +69,10 @@ module.exports = function(app) {
    * @apiDescription Retrieves a list of all the G&L products.
    * @apiSuccess {Object} products List of products.
    */
-  app.get('/', function(req, res) {
+  app.get('/', function(req, res, next) {
     Product.find(function(err, products) {
       if (err) {
-        console.log('GET /products error: ' + err);
-        return res.status(500).send('Error: ' + err.message);
+        return next(err);
       }
 
       res.json({
@@ -94,13 +91,12 @@ module.exports = function(app) {
    * @apiDescription Retrieves details about one product
    * @apiSuccess {Object} product Product details.
    */
-  app.get('/:productId', function(req, res) {
+  app.get('/:productId', function(req, res, next) {
     Product.findOne(
       { '_id': req.params.productId },
       function(err, product) {
         if (err) {
-          console.log('GET /products/:productId error: ' + err);
-          return res.status(500).send('Error: ' + err.message);
+          return next(err);
         }
 
         if (product) {
@@ -109,7 +105,7 @@ module.exports = function(app) {
             product: product
           });
         } else {
-          res.status(404).send('Product not found');
+          res.status(404).send({error: 'Product not found.'});
         }
     });
   });
@@ -134,7 +130,7 @@ module.exports = function(app) {
    * @apiDescription Adds a new product to the collection.
    * @apiSuccess {Object} product Returns the created product.
    */
-  app.post('/', function(req, res) {
+  app.post('/', function(req, res, next) {
     var product = {
       sku: req.body.sku,
       name: req.body.name,
@@ -159,14 +155,13 @@ module.exports = function(app) {
     });
 
     if (missingKeys.length > 0) {
-      return res.status(400).send('Params missing: ' + missingKeys);
+      return res.status(400).send({error: 'Params missing: ' + missingKeys});
     }
 
     var newProduct = new Product(product);
     newProduct.save(function(err, savedProduct) {
       if(err) {
-        console.log('POST /products/ error: ' + err);
-        return res.status(500).send('Error: ' + err.message);
+        return next(err);
       }
 
       res.redirect('/api/products');
@@ -182,11 +177,10 @@ module.exports = function(app) {
    * @apiDescription Deletes a product.
    * @apiSuccess {Object} product Product details.
    */
-  app.delete('/:productId', function(req, res) {
+  app.delete('/:productId', function(req, res, next) {
     Product.remove({_id: req.params.productId }, function(err, response) {
       if(err) {
-        console.log('DELETE /products/ error: ' + err);
-        return res.status(500).send('Error: ' + err.message);
+        return next(err);
       }
 
       res.json({
