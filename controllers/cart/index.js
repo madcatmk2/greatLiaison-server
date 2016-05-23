@@ -62,7 +62,7 @@ module.exports = function(app) {
    */
   app.put('/:productId', checkCartEmpty, function(req, res) {
     var item = req.session.cart[req.params.productId];
-    var quantity = req.body.quantity;
+    var quantity = parseInt(req.body.quantity);
 
     if (!item) {
       return res.status(404).send({error: 'Product not found.'});
