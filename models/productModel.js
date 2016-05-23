@@ -4,7 +4,7 @@ var mongoose = require('mongoose');
 
 var productModel = function () {
   var productSchema = mongoose.Schema({
-    sku: String,
+    sku: { type: String, index: true },
     name: String,
     englishName: String,
     categoryName: String,

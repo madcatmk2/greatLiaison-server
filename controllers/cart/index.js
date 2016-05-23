@@ -37,8 +37,7 @@ module.exports = function(app) {
       }
     });
     if (missingKeys.length > 0) {
-      console.log('POST /cart - Params missing: ' + missingKeys);
-      return res.status(400).send('Params missing: ' + missingKeys);
+      return res.status(400).send({error: 'Params missing: ' + missingKeys});
     }
 
     var cart = req.session.cart = req.session.cart || {};
@@ -63,16 +62,14 @@ module.exports = function(app) {
    */
   app.put('/:productId', checkCartEmpty, function(req, res) {
     var item = req.session.cart[req.params.productId];
-    var quantity = req.body.quantity;
+    var quantity = parseInt(req.body.quantity);
 
     if (!item) {
-      console.log('PUT /cart/:productId - Product not found.');
-      return res.status(404).send('Product not found.');
+      return res.status(404).send({error: 'Product not found.'});
     }
 
     if (!quantity) {
-      console.log('PUT /cart/:productId - Missing quantity to update.');
-      return res.status(400).send('Missing quantity to update.');
+      return res.status(400).send({error: 'Missing quantity to update.'});
     }
 
     item.quantity = quantity;
@@ -99,8 +96,7 @@ module.exports = function(app) {
   app.delete('/:productId', checkCartEmpty, function(req, res) {
     var item = req.session.cart[req.params.productId];
     if (!item) {
-      console.log('DELETE /cart/:productId - Product not found.');
-      return res.status(404).send('Product not found.');
+      return res.status(404).send({error: 'Product not found.'});
     }
 
     delete req.session.cart[req.params.productId];
@@ -123,7 +119,7 @@ module.exports = function(app) {
    */
   function checkCartEmpty(req, res, next) {
     if (!req.session.cart) {
-      return res.status(400).send('Cart is empty');
+      return res.status(400).send({error: 'Cart is empty'});
     } else {
       next();
     }

@@ -2,8 +2,6 @@
 
 var app = require('./index');
 var http = require('http');
-
-
 var server;
 
 /*
@@ -13,5 +11,5 @@ var server;
 server = http.createServer(app);
 server.listen(process.env.PORT || 8080);
 server.on('listening', function () {
-    console.log('Server listening on http://localhost:%d', this.address().port);
+    console.log('Server listening on port %d', this.address().port);
 });

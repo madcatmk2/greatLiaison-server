@@ -5,9 +5,6 @@ var kraken   = require('kraken-js');
 var db       = require('./lib/database');
 var path     = require('path');
 
-//var passport = require('passport');
-//var flash    = require('connect-flash');
-
 var options, app;
 
 /*
@@ -26,24 +23,7 @@ app = module.exports = express();
 
 app.use('/api', kraken(options));
 app.use('/apidoc', express.static(__dirname + '/apidoc'));
-
-//app.use(passport.initialize());
-//app.use(passport.session()); // persistent login sessions
-// app.use(flash()); // use connect-flash for flash messages stored in session
-
 app.on('start', function () {
   console.log('Application ready to serve requests.');
   console.log('Environment: %s', app.kraken.get('env:env'));
 });
-
-// route middleware to only allow connections from certain IP's
-function isIPAllowed(ip) {
-
-  // if IP is allowed, continue
-  if (ip == '127.0.0.1' || ip == 'localhost') {
-    return true;
-  }
-
-  // otherwise reject
-  return false;
-}
