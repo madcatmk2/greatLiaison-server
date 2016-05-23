@@ -23,7 +23,10 @@ var orderModel = function() {
   });
 
   var paypalSchema = mongoose.Schema({
-    transactionId: String,
+    paymentId: String,
+    paymentDate: { type: Date, default: Date.now },
+    saleId: String,
+    cartId: String,
     payer: {
       id: String,
       firstName: String,
@@ -49,7 +52,7 @@ var orderModel = function() {
     shippingInfo: shippingInfoSchema,
     totalAmount: Number,
     referrer: String,
-    method: String,
+    paymentMethod: String,
     paypal: paypalSchema
   });
 
